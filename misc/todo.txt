@@ -1,0 +1,4 @@
+pacman binary archlinux
+bsdtar source
+rpm error
+support for other script
