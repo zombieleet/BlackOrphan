@@ -112,23 +112,24 @@ createMalPet() {
 		mkdir "${dirfile}"
 		cd "$_"
 		chmod -R 777 "../${dirfile}"
-		! [ -x "../misc" -a -r "../misc" -a -w "../misc" ] && \
-		    chmod -R 777 "../misc"
+		#! [ -x "../misc" -a -r "../misc" -a -w "../misc" ] && \
+		#   chmod -R 777 "../misc"
+		
 		chk_file
 		cd -
-		mv "${dirfile}" "${CUT_IT}"
+		mv "${dirfile}" "${fileName}"
 		echo "${open}${bold}${green}HIT ENTER AT ALL FIELDS${close}"
 		sleep 2
-		createpet "${CUT_IT}"
-		rm -rf "${CUT_IT}"
-		chmod 777 "${CUT_IT}.pet"
+		createpet "${fileName}"
+		rm -rf "${fileName}"
+		chmod 777 "${fileName}.pet"
 		box3d
 		;;
 	    n|N)
 		shit_func
 		;;
 	    *)
-		echo "${open}${bold}${red}Invalid response ${close}"
+		printf "${open}${bold}${red}%s${close}\n" "Invalid response "
 		continue ;;
 	esac
     done
