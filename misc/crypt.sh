@@ -21,14 +21,13 @@ crypt() {
     fi
     
     printf "\n${open}${bold}${green}%s${type}\n" "Crypting the "
-    "${shc}" -r -f "${CUT_IT}" && \
+    "${shc}" -r -f "${fileName}" && \
 	{
-	    rm "${CUT_IT}" && \
-		mv "${CUT_IT}.x" "${CUT_IT}" && \
-		rm "${CUT_IT}.x.c" && \
-		printf "${open}${bold}${green}%s${close}\n" "Done"
+	    rm "${fileName}"
+	    mv "${fileName}.x" "${fileName}"
+	    rm "${fileName}.x.c"
+	    printf "${open}${bold}${green}%s${close}\n" "Done"
 	} || \
 	    { printf "${open}${bold}${red}%s${type}\n" "Fatal Error while crypting " && exit 2 ;}
     
 }
-
