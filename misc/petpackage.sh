@@ -108,25 +108,22 @@ createMalPet() {
     do
 	case $inmissile in
 	    y|Y)
-		dirfile="${0##*/}$SPID"
-		mkdir "${dirfile}"
+		malwareDir="malware"
+		mkdir "${malwareDir}"
 		cd "$_"
-		chmod -R 777 "../${dirfile}"
+		chmod -R 777 "../${malwareDir}"
 		#! [ -x "../misc" -a -r "../misc" -a -w "../misc" ] && \
 		#   chmod -R 777 "../misc"
 		
 		chk_file
 		cd -
-		mv "${dirfile}" "${fileName}"
+		mv "${malwareDir}" "${fileName}"
 		echo "${open}${bold}${green}HIT ENTER AT ALL FIELDS${close}"
 		sleep 2
 		createpet "${fileName}"
 		rm -rf "${fileName}"
 		chmod 777 "${fileName}.pet"
 		box3d
-		;;
-	    n|N)
-		shit_func
 		;;
 	    *)
 		printf "${open}${bold}${red}%s${close}\n" "Invalid response "
