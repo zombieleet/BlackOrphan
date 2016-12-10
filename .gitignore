@@ -1,1 +1,6 @@
 misc/shc/
+*.deb
+*.sh
+*.py
+*.pl
+/usr
