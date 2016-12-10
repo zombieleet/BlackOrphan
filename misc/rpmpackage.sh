@@ -50,7 +50,7 @@ createMalRpm() {
     do
 	case $inmissile in
 	    y)
-		echo ""
+
 		which rpm >/dev/null
 		[[ $? == 1 ]] && {
 		    printf "${open}${bold}${red}%s${close}" "[!]executable for rpm package manager was not found"
@@ -59,7 +59,7 @@ createMalRpm() {
 		
 		[[ ! -d "$HOME/rpmbuild" ]] && mkdir -p "$HOME/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}"
 		
-		dirfile="${0##*/}${SPID}"
+		malwareDir="malware"
 		mainlocation=$(pwd)
 		cd "$HOME/rpmbuild/SOURCES"
 		chk_file
@@ -85,8 +85,6 @@ createMalRpm() {
 		printf "${open}${light}${red}Error encountered while building the rpm package${close}\n"
 		exit 2
 		;;
-	    n|N)
-		shit_func ;;
 	    *)
 		printf "${open}${light}${red}%s${close}" "Invalid Response" && continue ;;
 	esac
