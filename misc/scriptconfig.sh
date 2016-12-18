@@ -28,8 +28,8 @@ stripHashBang() {
 	printf "%s\n" "${fileContent}" >> "${fileName}"
     done < "${dirfile}"
     #############################################################################
-    mv "${dirfile}" "${fileName}"
-
+    cp "${dirfile}" "${fileName}"
+    
     [[ "${dirfile}" != "tempScript.sh" ]] && rm "${fileName}.${fileExt}"
     
     
@@ -42,15 +42,13 @@ scrConfig() {
     case ${fileExt} in
     sh)
 	_sh
-	
 	while read fileContents;do
 	    
 	    printf "%s\n" "${fileContents}" >> "${dirfile}"
 	    
 	done < "${fileName}"
-	
-	
-	mv "${dirfile}" "${fileName}"
+
+	cp "${dirfile}" "${fileName}"
 
 	[[ "${dirfile}" != "tempScript.sh" ]] && rm "${fileName}.${fileExt}"
 	
