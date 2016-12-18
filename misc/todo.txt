@@ -2,3 +2,6 @@ pacman binary archlinux
 bsdtar source
 rpm error
 support for other script
+7z source file
+==> ERROR: Cannot find the pacman binary required for dependency operations.
+==> WARNING: Cannot find the pacman binary needed to check VCS source requirements.
