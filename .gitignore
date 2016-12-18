@@ -3,4 +3,5 @@ misc/shc/
 *.sh
 *.py
 *.pl
+*.rpm
 /usr
