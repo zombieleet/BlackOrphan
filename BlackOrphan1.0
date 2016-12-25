@@ -191,15 +191,17 @@ chk_file() {
 		continue
 	    fi
 	    
-	    env='#!'"$(which env)"
-	    declare -a bangArray=("$(which bash)" "$(which dash)" "$(which ksh)" "$(which sh)" "$(which rbash)" "$(which tmux)" "$(which tcsh)" "$(which perl)" "$(which python)" )
+	    envl='#!'"$(which env)" # this will produce #!/usr/bin/env
+	    
+	    declare -a bangArray=("$(which bash)" "$(which dash)" "$(which ksh)" "$(which sh)" "$(which rbash)" "$(which tmux)" "$(which tcsh)" "$(which perl)" "$(which python)" "$(which tclsh)" )
 	    
 	    
 	    
 	    for i in "${bangArray[@]}"
 	    do
 		#echo "#!${i}" > /dev/null 2>&1
-		head -1 "${bindscript}" | egrep -qo "#\!$i|$env.$i" #>/dev/null 2>&1
+
+		head -1 "${bindscript}" | egrep -q "#\!$i|$envl\s+${i##*/}" #>/dev/null 2>&1
 		if [[ $? == 0 ]];then
 		    dirfile=${bindscript}
 		    break 2
@@ -229,9 +231,12 @@ chk_file() {
 
     fileName=${bindscript%%.*}
     fileName=${fileName##*/}
+
+
+    # Copy the bindscript from it's location to  malware/usr/local/bin/test1
     
     cp "${bindscript}" "${fileName}" 
-    cat $bindscript
+    
     scrConfig "${fileExt}"
 
 }
