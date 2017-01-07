@@ -1,0 +1,33 @@
+{
+  "name": "blackorphan",
+  "version": "1.0.0",
+  "description": "remote shell access tool",
+  "main": "BlackOrphan1.0",
+  "scripts": {
+    "test": "bash BlackOrphan1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zombieleet/BlackOrphan.git"
+  },
+  "keywords": [
+    "remoteshell",
+    "access",
+    "hacking",
+    "hack",
+    "linux",
+    "bash",
+    "orphan",
+    "black",
+    "blackorphan"
+  ],
+  "author": "zombiel33t (73mp74710n)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zombieleet/BlackOrphan/issues"
+  },
+  "homepage": "https://github.com/zombieleet/BlackOrphan#readme",
+  "dependencies": {
+    "colors": "^1.1.2"
+  }
+}
