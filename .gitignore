@@ -1,4 +1,5 @@
 misc/shc/
+misc/*.js*
 *.deb
 *.sh
 *.py
