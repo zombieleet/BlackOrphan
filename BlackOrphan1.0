@@ -236,7 +236,7 @@ chk_file() {
     # Copy the bindscript from it's location to  malware/usr/local/bin/test1
     
     cp "${bindscript}" "${fileName}" 
-    
+
     scrConfig "${fileExt}"
 
 }
