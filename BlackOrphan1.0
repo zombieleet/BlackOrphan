@@ -82,14 +82,8 @@ main_menu(){
 #########ABOUT BLACK ORPHAN TOOL
 about(){
     header
-    printf "%s\n\n" "BLACK ORPHAN"
-    printf "%s\n\n" "Copyright 2015 BLACK ORPHAN"
-    printf "Written by: %s\n\nTeam: %s\n\nEmail: %s\n\n" "$author" "$team" "$eaddress"
-    printf "%s\n\n" "####REQUIREMENT"
-
-
     printf "%s\n" "* shc"
-    printf "%s\n" "* tcl"
+    printf "%s\n" "* node"
     
     printf "%s\n\n" "####Supproted Platform"
     printf "%s\n\n" "* Linux"
