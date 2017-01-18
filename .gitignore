@@ -6,3 +6,4 @@ misc/*.js*
 *.pl
 *.rpm
 /usr
+test*
