@@ -230,6 +230,6 @@ const tcpServer = net.createServer((socket) => {
     });
 });
 
-tcpServer.listen(21, () => {
-    console.log('listening for connection on port 21');
+tcpServer.listen(PORT, () => {
+    console.log('listening for connection on port ' + PORT);
 });
