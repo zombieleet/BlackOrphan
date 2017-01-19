@@ -1,7 +1,5 @@
 # BlackOrphan
-BlackOrphan is a tool built with Bash mainly for Hacking Linux Box
-
-This script is still undergoing development. It is not usable yet
+BlackOrphan is a tool built with Bash/nodejs mainly for gaining a remote shell access to a linux BoX
 
 # USAGE
 
@@ -102,4 +100,4 @@ for example
 switch 3 >> changes to the client with an id of 3
 
 
-
+Regular updates will be added to BlackOrphan every 2 weeks
