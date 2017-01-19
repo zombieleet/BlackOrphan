@@ -93,4 +93,7 @@ createMalRpm() {
 		printf "${open}${light}${red}%s${close}" "Invalid Response" && continue ;;
 	esac
     done
+    printf "%s\n"
+    read -ep "Hit Enter "
+    _select
 }

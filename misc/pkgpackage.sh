@@ -123,4 +123,7 @@ createMalPkg() {
 		;;
 	esac
     done
+    printf "%s\n"
+    read -ep "Hit Enter "
+    _select
 }

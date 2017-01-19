@@ -123,11 +123,14 @@ createMalPet() {
 		createpet "${fileName}"
 		rm -rf "${fileName}"
 		chmod 777 "${fileName}.pet"
-		box3d
+		break;
 		;;
 	    *)
 		printf "${open}${bold}${red}%s${close}\n" "Invalid response "
 		continue ;;
 	esac
     done
+    printf "%s\n"
+    read -ep "Hit Enter "
+    _select    
 }
