@@ -138,7 +138,7 @@ _select(){
 		    break
 		done
 
-		reset && box3d && break
+		reset && ./listener.js "$l_port" && break
 
 		;;
 
